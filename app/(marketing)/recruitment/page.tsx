@@ -11,8 +11,8 @@ const jobListings = [
     location: 'Dubai, UAE',
     type: 'Full-time',
     experience: 'Entry Level',
-    salary: 'AED 4,000 - 8,000 + Commission',
-    description: 'Join our field force team and become the face of leading brands across the UAE. Perfect for motivated individuals looking to start their sales career with unlimited earning potential.',
+    compensation: 'Commission-based during training, then base + commission',
+    description: 'Join our field force team and become the face of leading brands across the UAE. Perfect for motivated individuals looking to start their sales career with unlimited earning potential. Special Note: Initial training is commission-based. Success leads to base salary plus commission.',
     whatYouWillDo: [
       'Conduct door-to-door and retail sales campaigns for premium brands',
       'Build relationships with customers and identify their needs',
@@ -32,7 +32,7 @@ const jobListings = [
       'Uncapped commission structure',
       'Comprehensive training through SASA Academy',
       'Clear 5-phase career progression path',
-      'Health insurance coverage',
+      'Health insurance coverage (after training)',
       'Transportation allowance',
       'Performance bonuses and incentives',
     ],
@@ -45,7 +45,6 @@ const jobListings = [
     location: 'Dubai, UAE',
     type: 'Full-time',
     experience: '2+ Years',
-    salary: 'AED 10,000 - 15,000 + Bonus',
     description: 'Manage key client accounts and drive campaign success. Ideal for experienced sales professionals ready to take ownership of client relationships and multi-location operations.',
     whatYouWillDo: [
       'Manage relationships with assigned client accounts',
@@ -81,7 +80,6 @@ const jobListings = [
     location: 'Abu Dhabi, UAE',
     type: 'Full-time',
     experience: '3+ Years',
-    salary: 'AED 15,000 - 22,000 + Team Bonus',
     description: 'Lead and motivate field teams to achieve daily targets. Perfect for natural leaders who can inspire teams, drive performance, and develop talent.',
     whatYouWillDo: [
       'Lead a team of 8-12 field sales agents',
@@ -103,7 +101,7 @@ const jobListings = [
       'Fluent in English and Arabic',
     ],
     benefits: [
-      'Base salary + team performance bonus (up to 30%)',
+      'Competitive base salary + team performance bonus',
       'Company vehicle or car allowance',
       'Fuel card',
       'Annual leave: 25 days',
@@ -120,7 +118,6 @@ const jobListings = [
     location: 'Dubai, UAE',
     type: 'Full-time',
     experience: '5+ Years',
-    salary: 'AED 25,000 - 40,000',
     description: 'Provide strategic financial guidance and manage corporate partnerships. Seeking experienced finance professionals to drive financial planning and analysis across our growing operations.',
     whatYouWillDo: [
       'Lead financial planning and analysis (FP&A) activities',
@@ -159,7 +156,6 @@ const jobListings = [
     location: 'Dubai, UAE',
     type: 'Full-time',
     experience: '4+ Years',
-    salary: 'AED 20,000 - 32,000',
     description: 'Drive Salesforce implementation and optimization across our SASA OS platform. Join our technology team to build the systems that power UAE\'s most advanced sales operations.',
     whatYouWillDo: [
       'Configure and customize Salesforce Sales Cloud and Service Cloud',
@@ -198,7 +194,6 @@ const jobListings = [
     location: 'Dubai, UAE',
     type: 'Full-time',
     experience: '3+ Years',
-    salary: 'AED 12,000 - 18,000',
     description: 'Oversee daily office operations and support our growing team. Ideal for organized professionals who thrive in fast-paced environments and can manage multiple priorities with ease.',
     whatYouWillDo: [
       'Manage day-to-day office operations and facilities',
@@ -301,11 +296,10 @@ export default function RecruitmentPage() {
                 <button
                   key={dept}
                   onClick={() => setSelectedDepartment(dept)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    selectedDepartment === dept
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedDepartment === dept
                       ? 'bg-navy text-white'
                       : 'bg-cream text-gray-600 hover:bg-navy/10'
-                  }`}
+                    }`}
                 >
                   {dept}
                 </button>
@@ -371,10 +365,12 @@ export default function RecruitmentPage() {
                     {/* Overview & Salary */}
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 pb-6 border-b border-gray-100">
                       <p className="text-gray-600 flex-1">{job.description}</p>
-                      <div className="flex-shrink-0 px-4 py-3 bg-navy/5 rounded-xl">
-                        <span className="text-xs text-gray-500 uppercase tracking-wider">Salary Range</span>
-                        <div className="text-lg font-bold text-navy">{job.salary}</div>
-                      </div>
+                      {job.id === 1 && (
+                        <div className="flex-shrink-0 px-4 py-3 bg-navy/5 rounded-xl border border-navy/10">
+                          <span className="text-xs text-gray-500 uppercase tracking-wider">Compensation Model</span>
+                          <div className="text-sm font-bold text-navy mt-1">Commission-based during training</div>
+                        </div>
+                      )}
                     </div>
 
                     {/* What You'll Do */}
