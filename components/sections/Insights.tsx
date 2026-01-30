@@ -5,22 +5,28 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 
 const insights = [
   {
-    title: 'The Scaling Blueprint: Helping Regional Banks Prepare for the Future',
-    category: 'Strategy',
+    slug: 'outsourcing-sales-operations-transform-business',
+    title: 'How Outsourcing Sales Operations Can Transform Your Business',
+    category: 'Sales Strategy',
     date: 'Jan 2026',
-    excerpt: 'How financial institutions can leverage outsourced sales operations to accelerate growth.',
+    excerpt: 'Discover why leading companies in the UAE are choosing to outsource their sales operations and the measurable impact it has on growth.',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
   {
-    title: 'Healthcare Private Equity Market 2024: Year in Review and Outlook',
-    category: 'Industry',
-    date: 'Dec 2025',
-    excerpt: 'Key trends and opportunities in healthcare sector sales and distribution.',
+    slug: 'power-of-field-sales-teams-uae',
+    title: 'The Power of Field Sales Teams in the UAE Market',
+    category: 'Field Operations',
+    date: 'Jan 2026',
+    excerpt: 'Learn how face-to-face sales interactions continue to drive exceptional results in the UAE\'s unique business environment.',
+    image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
   {
-    title: 'AI-Enabled Sales: The Future of Field Operations',
+    slug: 'data-driven-sales-strategies',
+    title: 'Why Data-Driven Sales Strategies Outperform Traditional Methods',
     category: 'Technology',
-    date: 'Nov 2025',
-    excerpt: 'How artificial intelligence is transforming on-ground sales execution.',
+    date: 'Jan 2026',
+    excerpt: 'Explore how SASA OS and real-time analytics are revolutionizing sales performance across all seven Emirates.',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
 ];
 
@@ -36,15 +42,14 @@ export default function Insights() {
                 Our Latest Insights
               </h2>
               <p className="text-gray-600 mt-4 max-w-xl">
-                Proprietary data, expert analysis and bold thinking for leaders
-                who want to achieve the extraordinary.
+                Expert perspectives on field sales, growth strategies, and operational excellence in the UAE market.
               </p>
             </div>
             <Link
               href="/blog"
               className="inline-flex items-center gap-2 text-navy font-semibold hover:underline whitespace-nowrap"
             >
-              More Insights
+              View All Articles
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -55,29 +60,39 @@ export default function Insights() {
         <div className="grid md:grid-cols-3 gap-6">
           {insights.map((insight, index) => (
             <ScrollReveal key={index} delay={index * 150}>
-              <article
-                className="bg-white rounded-2xl overflow-hidden hover:shadow-card hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <div className="h-48 bg-navy/10 flex items-center justify-center">
-                  <svg className="w-16 h-16 text-navy/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="px-2 py-1 bg-navy/10 text-navy text-xs font-medium rounded">
+              <Link href={`/blog/${insight.slug}`} className="block group">
+                <article
+                  className="bg-white rounded-2xl overflow-hidden hover:shadow-card hover:-translate-y-1 transition-all duration-300 h-full"
+                >
+                  <div className="h-48 relative overflow-hidden">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                      style={{ backgroundImage: `url("${insight.image}")` }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <span className="absolute bottom-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm text-navy text-xs font-medium rounded-full">
                       {insight.category}
                     </span>
-                    <span className="text-gray-400 text-xs">{insight.date}</span>
                   </div>
-                  <h3 className="text-lg font-bold text-navy mb-2 group-hover:text-navy/80 transition-colors">
-                    {insight.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {insight.excerpt}
-                  </p>
-                </div>
-              </article>
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-gray-400 text-xs">{insight.date}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-navy mb-2 group-hover:text-navy/80 transition-colors line-clamp-2">
+                      {insight.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm line-clamp-2">
+                      {insight.excerpt}
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-navy font-medium text-sm mt-4 group-hover:gap-3 transition-all">
+                      Read more
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </div>
+                </article>
+              </Link>
             </ScrollReveal>
           ))}
         </div>
