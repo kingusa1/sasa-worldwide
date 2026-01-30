@@ -1,16 +1,14 @@
 # SASA Worldwide
 
 <div align="center">
-  <img src="/public/images/logo/cropped-sasa-logo.png" alt="SASA Worldwide Logo" width="200"/>
+  <br/>
 
   **The Performance Growth Engine**
 
   UAE's Leading Sales Operations & Sales as a Service Company
 
-  [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
   [![License](https://img.shields.io/badge/License-Proprietary-red)](#license)
+  [![Status](https://img.shields.io/badge/Status-Production-green)](#)
 </div>
 
 ---
@@ -50,20 +48,8 @@ If you discover a security vulnerability, please report it responsibly:
 | **CSRF Protection** | Anti-CSRF tokens on all state-changing operations |
 | **SQL Injection** | Parameterized queries and ORM-based data access |
 | **Rate Limiting** | API endpoint protection against brute force and abuse |
-| **Security Headers** | Full suite of protective HTTP headers |
+| **Security Headers** | HSTS, X-Frame-Options, X-Content-Type-Options, CSP |
 | **Dependency Scanning** | Automated vulnerability scanning of dependencies |
-
-#### Security Headers Configuration
-
-```
-Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-X-Frame-Options: DENY
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 1; mode=block
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-Content-Security-Policy: default-src 'self'; frame-ancestors 'none';
-```
 
 #### Data Protection & Encryption
 
@@ -100,24 +86,6 @@ Content-Security-Policy: default-src 'self'; frame-ancestors 'none';
 - Penetration testing conducted quarterly
 - SOC 2 Type II compliance (in progress)
 - Regular security awareness training for all staff
-
----
-
-## Brand Guidelines
-
-### Colors
-
-| Color | Hex | Usage |
-|-------|-----|-------|
-| Navy | `#002E59` | Primary brand color |
-| Cream | `#f8f6f3` | Background accent |
-| White | `#FFFFFF` | Primary background |
-| Green | `#25D366` | WhatsApp/Success |
-
-### Typography
-
-- **Primary Font**: Inter
-- **Fallback**: system-ui, -apple-system, sans-serif
 
 ---
 
