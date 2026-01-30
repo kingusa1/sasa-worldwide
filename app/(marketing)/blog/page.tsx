@@ -1,59 +1,64 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 export const metadata = {
-  title: 'Blog - SASA Financial Consulting',
-  description: 'Stay informed with the latest financial insights, tips, and news from SASA.',
+  title: 'Insights & Blog | SASA Worldwide',
+  description: 'Expert insights on sales operations, field force management, and growth strategies for businesses in the UAE.',
 };
 
 const posts = [
   {
-    slug: 'understanding-market-volatility',
-    title: 'Understanding Market Volatility: A Guide for Investors',
-    excerpt: 'Learn how to navigate market ups and downs with confidence and make informed investment decisions.',
-    date: 'January 15, 2026',
-    category: 'Investment',
-    readTime: '5 min read',
-  },
-  {
-    slug: 'retirement-planning-essentials',
-    title: '5 Essential Steps for Retirement Planning in 2026',
-    excerpt: 'Start planning your retirement early with these fundamental strategies for long-term financial security.',
-    date: 'January 10, 2026',
-    category: 'Planning',
-    readTime: '7 min read',
-  },
-  {
-    slug: 'tax-optimization-strategies',
-    title: 'Tax Optimization Strategies for Small Business Owners',
-    excerpt: 'Discover legal ways to minimize your tax burden and maximize your business profits.',
-    date: 'January 5, 2026',
-    category: 'Tax',
+    slug: 'outsourcing-sales-operations-transform-business',
+    title: 'How Outsourcing Sales Operations Can Transform Your Business',
+    excerpt: 'Discover why leading companies in the UAE are choosing to outsource their sales operations and the measurable impact it has on growth.',
+    date: 'January 25, 2026',
+    category: 'Sales Strategy',
     readTime: '6 min read',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
   {
-    slug: 'diversification-importance',
-    title: 'Why Diversification Matters More Than Ever',
-    excerpt: 'Explore the benefits of portfolio diversification and how it can protect your investments.',
-    date: 'December 28, 2025',
-    category: 'Investment',
-    readTime: '4 min read',
-  },
-  {
-    slug: 'emergency-fund-guide',
-    title: 'Building Your Emergency Fund: How Much is Enough?',
-    excerpt: 'A comprehensive guide to creating and maintaining an emergency fund for financial security.',
-    date: 'December 20, 2025',
-    category: 'Planning',
+    slug: 'power-of-field-sales-teams-uae',
+    title: 'The Power of Field Sales Teams in the UAE Market',
+    excerpt: 'Learn how face-to-face sales interactions continue to drive exceptional results in the UAE\'s unique business environment.',
+    date: 'January 20, 2026',
+    category: 'Field Operations',
     readTime: '5 min read',
+    image: 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
   {
-    slug: 'crypto-investment-basics',
-    title: 'Cryptocurrency Investment: Risks and Opportunities',
-    excerpt: 'An overview of cryptocurrency investments and what you need to know before getting started.',
-    date: 'December 15, 2025',
-    category: 'Investment',
+    slug: 'data-driven-sales-strategies',
+    title: 'Why Data-Driven Sales Strategies Outperform Traditional Methods',
+    excerpt: 'Explore how SASA OS and real-time analytics are revolutionizing sales performance across all seven Emirates.',
+    date: 'January 15, 2026',
+    category: 'Technology',
+    readTime: '7 min read',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    slug: 'scaling-sales-team-inhouse-vs-outsourcing',
+    title: 'Scaling Your Sales Team: In-House vs Outsourcing',
+    excerpt: 'A comprehensive comparison to help you decide the best approach for your business growth in the competitive UAE market.',
+    date: 'January 10, 2026',
+    category: 'Growth',
     readTime: '8 min read',
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    slug: 'future-of-sales-operations-ai-analytics',
+    title: 'The Future of Sales: AI, Analytics, and the Human Touch',
+    excerpt: 'How SASA Worldwide combines cutting-edge technology with elite human talent to deliver unmatched sales results.',
+    date: 'January 5, 2026',
+    category: 'Innovation',
+    readTime: '6 min read',
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    slug: 'building-high-performance-sales-culture',
+    title: 'Building a High-Performance Sales Culture: Lessons from 600+ Campaigns',
+    excerpt: 'Key insights from SASA Academy on training, motivation, and retention strategies that create winning sales teams.',
+    date: 'December 28, 2025',
+    category: 'Leadership',
+    readTime: '7 min read',
+    image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
   },
 ];
 
@@ -61,55 +66,134 @@ export default function BlogPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Blog</h1>
-            <p className="text-xl text-gray-300">
-              Insights, tips, and news to help you make smarter financial decisions.
-            </p>
-          </div>
+      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
+          }}
+        >
+          <div className="absolute inset-0 bg-navy/80"></div>
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium tracking-wider mb-6">
+            INSIGHTS
+          </span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Sales Operations Insights
+          </h1>
+          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+            Expert perspectives on field sales, growth strategies, and operational excellence in the UAE market.
+          </p>
         </div>
       </section>
 
-      {/* Blog Posts */}
-      <section className="py-20 bg-white">
+      {/* Featured Post */}
+      <section className="py-16 bg-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="section-badge text-navy mb-8 block">FEATURED ARTICLE</span>
+
+          <Link href={`/blog/${posts[0].slug}`} className="block group">
+            <div className="grid lg:grid-cols-2 gap-8 bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300">
+              <div className="relative h-64 lg:h-auto min-h-[300px]">
+                <div
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                  style={{ backgroundImage: `url("${posts[0].image}")` }}
+                />
+              </div>
+              <div className="p-8 lg:p-12 flex flex-col justify-center">
+                <div className="flex items-center gap-4 text-sm mb-4">
+                  <span className="bg-navy/10 text-navy px-3 py-1 rounded-full font-medium">
+                    {posts[0].category}
+                  </span>
+                  <span className="text-gray-500">{posts[0].readTime}</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-navy mb-4 group-hover:text-navy/80 transition-colors">
+                  {posts[0].title}
+                </h2>
+                <p className="text-gray-600 mb-6">{posts[0].excerpt}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">{posts[0].date}</span>
+                  <span className="text-navy font-medium group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                    Read Article
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* Blog Posts Grid */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <span className="section-badge text-navy mb-8 block">ALL ARTICLES</span>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <article key={post.slug} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-                {/* Image Placeholder */}
-                <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                  <span className="text-gray-400">[Image]</span>
+            {posts.slice(1).map((post) => (
+              <article key={post.slug} className="group bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 border border-gray-100">
+                {/* Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                    style={{ backgroundImage: `url("${post.image}")` }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  <span className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm text-navy px-3 py-1 rounded-full text-sm font-medium">
+                    {post.category}
+                  </span>
                 </div>
 
                 <div className="p-6">
                   <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                    <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">
-                      {post.category}
-                    </span>
+                    <span>{post.date}</span>
+                    <span>•</span>
                     <span>{post.readTime}</span>
                   </div>
 
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors">
+                  <h2 className="text-lg font-bold text-navy mb-3 group-hover:text-navy/80 transition-colors line-clamp-2">
                     <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                   </h2>
 
-                  <p className="text-gray-600 mb-4 line-clamp-2">{post.excerpt}</p>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{post.excerpt}</p>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">{post.date}</span>
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="text-blue-600 font-medium hover:text-blue-700 transition-colors"
-                    >
-                      Read more →
-                    </Link>
-                  </div>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="inline-flex items-center gap-2 text-navy font-medium text-sm hover:gap-3 transition-all"
+                  >
+                    Read more
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
                 </div>
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 bg-navy">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Ready to Transform Your Sales?
+          </h2>
+          <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+            Join 600+ companies that have partnered with SASA Worldwide to achieve measurable growth across the UAE.
+          </p>
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 bg-white text-navy px-8 py-4 rounded-full font-semibold hover:bg-cream transition-colors"
+          >
+            Get Started Today
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
         </div>
       </section>
     </>
