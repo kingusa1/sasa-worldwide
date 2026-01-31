@@ -248,7 +248,7 @@ export default function ContactPage() {
 
               {/* WhatsApp */}
               <a
-                href="https://wa.me/97145843777"
+                href="https://wa.me/971545304000"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block bg-white rounded-2xl p-6 shadow-card hover:shadow-lg transition-shadow"

@@ -10,7 +10,6 @@ import Clients from '@/components/sections/Clients';
 import CTA from '@/components/sections/CTA';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import WhatsAppFloat from '@/components/ui/WhatsAppFloat';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import BackToTop from '@/components/ui/BackToTop';
 
@@ -32,7 +31,6 @@ export default function Home() {
         <CTA />
       </main>
       <Footer />
-      <WhatsAppFloat />
       <BackToTop />
     </>
   );

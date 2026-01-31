@@ -16,7 +16,7 @@ export const SASA_KNOWLEDGE = {
   contact: {
     phone: "+971 4 584 3777",
     email: "info@sasa-worldwide.com",
-    whatsapp: "https://wa.me/97145843777",
+    whatsapp: "https://wa.me/971545304000",
     address: {
       building: "Prime Business Center - Tower A",
       office: "Office A1201",
@@ -100,13 +100,13 @@ export const SASA_KNOWLEDGE = {
   },
 
   careers: {
-    overview: "SASA offers a structured 5-phase leadership pathway for career growth.",
+    overview: "SASA offers a structured 5-phase leadership pathway for career growth - complete all phases within 1 year.",
     phases: [
-      { phase: 1, title: "Agent", duration: "0-6 months", subtitle: "Foundation", description: "Build your sales foundation with hands-on field experience." },
-      { phase: 2, title: "Account Manager", duration: "6-18 months", subtitle: "Growth", description: "Manage client relationships and develop account strategies." },
-      { phase: 3, title: "Crew Manager", duration: "18-36 months", subtitle: "Leadership", description: "Lead and mentor teams of 8-12 sales professionals." },
-      { phase: 4, title: "Assistant Director", duration: "3-5 years", subtitle: "Strategy", description: "Drive strategic initiatives and oversee multiple teams." },
-      { phase: 5, title: "Director", duration: "5+ years", subtitle: "Executive", description: "Shape company direction and lead major business units." },
+      { phase: 1, title: "Agent", duration: "Month 1-2", subtitle: "Foundation", description: "Build your sales foundation with hands-on field experience." },
+      { phase: 2, title: "Account Manager", duration: "Month 3-4", subtitle: "Growth", description: "Manage client relationships and develop account strategies." },
+      { phase: 3, title: "Crew Manager", duration: "Month 5-7", subtitle: "Leadership", description: "Lead and mentor teams of 8-12 sales professionals." },
+      { phase: 4, title: "Assistant Director", duration: "Month 8-10", subtitle: "Strategy", description: "Drive strategic initiatives and oversee multiple teams." },
+      { phase: 5, title: "Director", duration: "Month 11-12", subtitle: "Executive", description: "Shape company direction and lead major business units." },
     ],
     benefits: [
       "Merit-based advancement",
@@ -152,7 +152,7 @@ export const SASA_KNOWLEDGE = {
     instagram: "https://www.instagram.com/sasa__worldwide",
     facebook: "https://www.facebook.com/profile.php?id=61586521990816",
     linkedin: "https://www.linkedin.com/company/sasa-worldwide",
-    whatsapp: "https://wa.me/97145843777",
+    whatsapp: "https://wa.me/971545304000",
   },
 
   website: {
