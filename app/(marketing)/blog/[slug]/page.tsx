@@ -4,6 +4,12 @@ import { notFound } from 'next/navigation';
 import ShareButtons from '@/components/ui/ShareButtons';
 import { getPostBySlug, getAllPosts, BlogPost } from '@/lib/google-sheets';
 
+// Revalidate every 60 seconds to fetch fresh posts from Google Sheets
+export const revalidate = 60;
+
+// Allow dynamic params for new posts not in generateStaticParams
+export const dynamicParams = true;
+
 // Fallback posts data (existing content)
 const fallbackPosts: Record<string, {
   title: string;

@@ -6,6 +6,9 @@ export const metadata = {
   description: 'Expert insights on sales operations, field sales management, AI in sales, and growth strategies for businesses in the UAE.',
 };
 
+// Revalidate every 60 seconds to fetch fresh posts from Google Sheets
+export const revalidate = 60;
+
 // Fallback posts (existing content)
 const fallbackPosts = [
   {
