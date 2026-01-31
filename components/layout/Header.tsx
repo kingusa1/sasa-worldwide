@@ -66,9 +66,8 @@ export default function Header() {
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
-    }`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
+      }`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -78,9 +77,8 @@ export default function Header() {
               alt="SASA Worldwide"
               width={140}
               height={48}
-              className={`h-10 w-auto transition-all duration-300 ${
-                scrolled ? '' : 'brightness-0 invert'
-              }`}
+              className={`h-10 w-auto transition-all duration-300 ${scrolled ? '' : 'brightness-0 invert'
+                }`}
             />
           </Link>
 
@@ -95,11 +93,10 @@ export default function Header() {
               >
                 <Link
                   href={link.href}
-                  className={`px-4 py-2 text-sm font-medium transition-colors rounded-full flex items-center gap-1 ${
-                    scrolled
+                  className={`px-4 py-2 text-sm font-medium transition-colors rounded-full flex items-center gap-1 ${scrolled
                       ? 'text-gray-700 hover:text-navy hover:bg-gray-100'
                       : 'text-white hover:bg-white/10'
-                  } ${link.label === 'Home' ? (scrolled ? 'bg-navy/10 text-navy' : 'bg-white/20') : ''}`}
+                    } ${link.label === 'Home' ? (scrolled ? 'bg-navy/10 text-navy' : 'bg-white/20') : ''}`}
                 >
                   {link.label}
                   {link.submenu && (
@@ -135,11 +132,10 @@ export default function Header() {
               href="https://sasa-worldwide.app.clientclub.net/"
               target="_blank"
               rel="noopener noreferrer"
-              className={`px-4 py-2 text-sm font-medium rounded-full transition-all border ${
-                scrolled
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-all border ${scrolled
                   ? 'border-navy text-navy hover:bg-navy hover:text-white'
                   : 'border-white text-white hover:bg-white hover:text-navy'
-              }`}
+                }`}
             >
               Client Portal
             </a>
@@ -153,9 +149,8 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <button
-            className={`lg:hidden p-2 rounded-lg transition-colors ${
-              scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
-            }`}
+            className={`lg:hidden p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -171,7 +166,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-4 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="lg:hidden mt-4 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-[80vh] overflow-y-auto">
             <div className="p-4 space-y-1">
               {navLinks.map((link) => (
                 <div key={link.href}>

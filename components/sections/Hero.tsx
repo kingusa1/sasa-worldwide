@@ -69,7 +69,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex items-center overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-[100dvh] flex items-center overflow-hidden">
       {/* Background Image with Parallax */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
@@ -93,11 +93,10 @@ export default function Hero() {
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`relative px-6 py-3 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${
-                  activeTab === index
+                className={`relative px-6 py-3 rounded-full text-sm font-medium tracking-wide transition-all duration-300 ${activeTab === index
                     ? 'bg-white text-navy shadow-lg scale-105'
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
+                  }`}
               >
                 {tab.label}
                 {activeTab === index && (
