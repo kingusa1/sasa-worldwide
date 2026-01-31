@@ -69,7 +69,7 @@ const jobListings = [
       'Health insurance for employee + family',
       'Professional development budget',
       'Flexible working arrangements',
-      'Career progression to Crew Manager within 12-18 months',
+      'Career progression to Crew Manager within 2-3 months',
     ],
     team: 'You will work within our Client Relations team of 15 professionals, reporting to the Client Success Director.',
   },

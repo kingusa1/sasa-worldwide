@@ -12,24 +12,34 @@ const timeline = [
 
 const leadership = [
   {
-    name: 'Ahmed Al-Rashid',
-    role: 'Chief Executive Officer',
-    description: 'With over 20 years in sales operations and business development across the Middle East.',
+    name: 'Salah Elgemiabby',
+    role: 'Co-Founder & Executive Director',
+    description: 'Visionary leader driving SASA\'s mission to revolutionize sales operations across the UAE.',
   },
   {
-    name: 'Sarah Thompson',
+    name: 'Adam Qureshi',
+    role: 'Co-Founder & Executive Director',
+    description: 'Strategic partner building SASA into the UAE\'s leading sales operations company.',
+  },
+  {
+    name: 'Ahmed Abdulmutal',
     role: 'Chief Operations Officer',
     description: 'Expert in field operations management with a track record of scaling high-performance teams.',
   },
   {
-    name: 'Mohammed Hassan',
+    name: 'Lujain Karim',
+    role: 'Chief Financial Officer',
+    description: 'Financial strategist ensuring sustainable growth and operational excellence.',
+  },
+  {
+    name: 'Omnia Eltaib',
     role: 'Chief Technology Officer',
     description: 'Technology innovator driving AI integration and digital transformation initiatives.',
   },
   {
-    name: 'Fatima Al-Maktoum',
-    role: 'Chief People Officer',
-    description: 'Dedicated to building a world-class workforce through training and development programs.',
+    name: 'Dr. Malaz Elgemiabby',
+    role: 'Chief Strategic Operations Partner',
+    description: 'Strategic advisor guiding long-term vision and business development initiatives.',
   },
 ];
 
@@ -209,7 +219,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {leadership.map((person, index) => (
               <div
                 key={index}

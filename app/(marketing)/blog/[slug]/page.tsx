@@ -33,7 +33,7 @@ const fallbackPosts: Record<string, {
       <p>The UAE's dynamic business landscape presents unique challenges and opportunities. Companies that outsource their sales operations see an average of 23% improvement in sales performance within the first year.</p>
       <h2>Key Benefits of Outsourcing Sales Operations</h2>
       <h3>1. Immediate Access to Trained Talent</h3>
-      <p>With SASA Worldwide, you gain immediate access to our pool of 300+ elite sales professionals who are already trained in UAE market dynamics.</p>
+      <p>With SASA Worldwide, you gain immediate access to our pool of 500+ elite sales professionals who are already trained in UAE market dynamics.</p>
       <h3>2. Scalability Without the Risk</h3>
       <p>Outsourcing provides the flexibility to scale your sales force up or down without the long-term commitments and overhead costs.</p>
       <h2>Take the Next Step</h2>
@@ -319,7 +319,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               <div>
                 <h3 className="text-xl font-bold text-navy mb-2">About {post.author}</h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  SASA Worldwide is the UAE&apos;s leading sales operations company, delivering structured, scalable, and high-performance activation programs across all seven Emirates. With 600+ successful campaigns and 300+ elite sales professionals, we help businesses achieve measurable growth.
+                  SASA Worldwide is the UAE&apos;s leading sales operations company, delivering structured, scalable, and high-performance activation programs across all seven Emirates. With 600+ successful campaigns and 500+ elite sales professionals, we help businesses achieve measurable growth.
                 </p>
                 <Link
                   href="/about"
