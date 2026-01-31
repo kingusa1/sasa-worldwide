@@ -128,8 +128,20 @@ export default function Header() {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden lg:flex items-center">
+          {/* CTA Buttons */}
+          <div className="hidden lg:flex items-center gap-3">
+            <a
+              href="https://sasa-worldwide.app.clientclub.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`px-4 py-2 text-sm font-medium rounded-full transition-all border ${
+                scrolled
+                  ? 'border-navy text-navy hover:bg-navy hover:text-white'
+                  : 'border-white text-white hover:bg-white hover:text-navy'
+              }`}
+            >
+              Client Portal
+            </a>
             <Link
               href="/contact"
               className="btn-primary"
@@ -185,7 +197,16 @@ export default function Header() {
                   )}
                 </div>
               ))}
-              <div className="pt-4 mt-4 border-t border-gray-100">
+              <div className="pt-4 mt-4 border-t border-gray-100 space-y-3">
+                <a
+                  href="https://sasa-worldwide.app.clientclub.net/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full text-center py-3 px-4 border-2 border-navy text-navy font-medium rounded-full hover:bg-navy hover:text-white transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Client Portal
+                </a>
                 <Link
                   href="/contact"
                   className="btn-primary w-full text-center justify-center"
