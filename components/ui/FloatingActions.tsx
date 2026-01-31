@@ -161,7 +161,7 @@ export default function FloatingActions() {
       {/* Chat Window - opens when AI Assistant is selected */}
       {/* Mobile: full screen with safe area | Desktop: fixed size panel */}
       <div
-        className={`fixed z-50 transition-all duration-500 ease-out ${viewState === 'chat'
+        className={`fixed z-[100] transition-all duration-500 ease-out ${viewState === 'chat'
           ? 'opacity-100 scale-100 pointer-events-auto'
           : 'opacity-0 scale-95 pointer-events-none'
           } inset-0 sm:inset-auto sm:bottom-24 sm:right-6 sm:w-[380px] sm:h-[520px]`}
@@ -210,8 +210,9 @@ export default function FloatingActions() {
         </div>
       </div>
 
-      {/* Single Floating Button */}
-      <div className="fixed bottom-8 right-4 sm:bottom-8 sm:right-6 z-[60] safe-area-bottom">
+      {/* Single Floating Button - Hidden when chat is open */}
+      <div className={`fixed bottom-8 right-4 sm:bottom-8 sm:right-6 z-[60] safe-area-bottom transition-all duration-300 ${viewState === 'chat' ? 'opacity-0 translate-y-20 pointer-events-none' : 'opacity-100 translate-y-0'
+        }`}>
         <button
           onClick={handleButtonClick}
           className="group relative transition-all duration-300"
