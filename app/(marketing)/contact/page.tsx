@@ -1,33 +1,144 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { ContactFormData, ContactResponse } from '@/types/contact';
+import PhoneInput from '@/components/ui/PhoneInput';
+import Toast from '@/components/ui/Toast';
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  phone?: string;
+  message?: string;
+}
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
-    phone: '',
+    phone: '+971 ',
     company: '',
     service: '',
     message: '',
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
+    message: '',
+    type: 'success',
+    isVisible: false,
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = useCallback((): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Phone validation (optional but if provided, must be valid)
+    const phoneDigits = formData.phone?.replace(/\D/g, '') || '';
+    if (formData.phone && formData.phone.trim() !== '+971' && phoneDigits.length < 7) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    // Message validation
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', company: '', service: '', message: '' });
-    }, 3000);
+
+    if (!validateForm()) {
+      setToast({
+        message: 'Please fix the errors in the form',
+        type: 'error',
+        isVisible: true,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data: ContactResponse = await response.json();
+
+      if (data.success) {
+        setToast({
+          message: 'Your message has been sent successfully! We will get back to you soon.',
+          type: 'success',
+          isVisible: true,
+        });
+        setFormData({ name: '', email: '', phone: '+971 ', company: '', service: '', message: '' });
+        setErrors({});
+      } else {
+        setToast({
+          message: data.error || 'Something went wrong. Please try again.',
+          type: 'error',
+          isVisible: true,
+        });
+      }
+    } catch {
+      setToast({
+        message: 'Failed to send message. Please check your connection and try again.',
+        type: 'error',
+        isVisible: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors({ ...errors, [name]: undefined });
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData({ ...formData, phone: value });
+    if (errors.phone) {
+      setErrors({ ...errors, phone: undefined });
+    }
   };
 
   return (
     <div className="bg-white">
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast({ ...toast, isVisible: false })}
+      />
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 bg-navy text-white">
         <div
@@ -59,124 +170,128 @@ export default function ContactPage() {
               <h2 className="text-2xl font-bold text-navy mb-2">Send us a message</h2>
               <p className="text-gray-500 mb-8">Fill out the form and our team will get back to you within 24 hours.</p>
 
-              {submitted ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-navy/10 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                      placeholder="e.g. John Smith"
+                      className={errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
+                    />
+                    {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                   </div>
-                  <h3 className="text-2xl font-bold text-navy mb-2">Message Sent!</h3>
-                  <p className="text-gray-600">Thank you for reaching out. We&apos;ll be in touch soon.</p>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                      placeholder="e.g. john@company.com"
+                      className={errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
+                    />
+                    {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                  </div>
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="e.g. John Smith"
-                      />
-                    </div>
 
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="e.g. john@company.com"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="e.g. +971 50 123 4567"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                        Company Name
-                      </label>
-                      <input
-                        type="text"
-                        id="company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        placeholder="e.g. Your Company"
-                      />
-                    </div>
-                  </div>
-
+                <div className="grid sm:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-2">
-                      Service Interested In
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number
                     </label>
-                    <select
-                      id="service"
-                      name="service"
-                      value={formData.service}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy transition-all"
-                    >
-                      <option value="">Select a service</option>
-                      <option value="b2c">B2C Residential</option>
-                      <option value="b2b">B2B Corporate</option>
-                      <option value="b2b2c">B2B2C Hybrid</option>
-                      <option value="b2g">B2G Government</option>
-                      <option value="other">Other / General Inquiry</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={5}
-                      placeholder="Tell us about your sales goals and how we can help..."
-                      className="resize-none"
+                    <PhoneInput
+                      value={formData.phone || '+971 '}
+                      onChange={handlePhoneChange}
+                      disabled={isLoading}
+                      error={errors.phone}
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="btn-primary w-full justify-center"
+                  <div>
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Name
+                    </label>
+                    <input
+                      type="text"
+                      id="company"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                      placeholder="e.g. Your Company"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-2">
+                    Service Interested In
+                  </label>
+                  <select
+                    id="service"
+                    name="service"
+                    value={formData.service}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
-                    Send Message
-                  </button>
-                </form>
-              )}
+                    <option value="">Select a service</option>
+                    <option value="b2c">B2C Residential</option>
+                    <option value="b2b">B2B Corporate</option>
+                    <option value="b2b2c">B2B2C Hybrid</option>
+                    <option value="b2g">B2G Government</option>
+                    <option value="other">Other / General Inquiry</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                    Message *
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    rows={5}
+                    placeholder="Tell us about your sales goals and how we can help..."
+                    className={`resize-none disabled:bg-gray-100 disabled:cursor-not-allowed ${errors.message ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                  />
+                  {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message}</p>}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
+                </button>
+              </form>
             </div>
 
             {/* Contact Info */}

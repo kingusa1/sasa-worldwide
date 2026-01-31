@@ -1,32 +1,210 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
+import PhoneInput from '@/components/ui/PhoneInput';
+import Toast from '@/components/ui/Toast';
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  message?: string;
+}
 
 export default function CTA() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
+    phone: '+971 ',
     company: '',
     message: '',
   });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
+    message: '',
+    type: 'success',
+    isVisible: false,
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Newsletter state
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterError, setNewsletterError] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const validateForm = useCallback((): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Phone validation (optional but if provided, must be valid)
+    const phoneNumber = formData.phone.replace(/^\+\d+\s*/, '').trim();
+    if (phoneNumber && phoneNumber.length < 7) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    // Message validation
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log(formData);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setToast({
+          message: result.message || 'Your message has been sent successfully!',
+          type: 'success',
+          isVisible: true,
+        });
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '+971 ',
+          company: '',
+          message: '',
+        });
+        setErrors({});
+      } else {
+        setToast({
+          message: result.error || 'Failed to send message. Please try again.',
+          type: 'error',
+          isVisible: true,
+        });
+      }
+    } catch {
+      setToast({
+        message: 'An error occurred. Please try again later.',
+        type: 'error',
+        isVisible: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors({ ...errors, [name]: undefined });
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData({ ...formData, phone: value });
+    if (errors.phone) {
+      setErrors({ ...errors, phone: undefined });
+    }
+  };
+
+  // Newsletter handlers
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newsletterEmail.trim()) {
+      setNewsletterError('Email is required');
+      return;
+    }
+    if (!emailRegex.test(newsletterEmail)) {
+      setNewsletterError('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubscribing(true);
+    setNewsletterError('');
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setToast({
+          message: result.message || 'Thank you for subscribing!',
+          type: 'success',
+          isVisible: true,
+        });
+        setNewsletterEmail('');
+      } else {
+        setToast({
+          message: result.error || 'Failed to subscribe. Please try again.',
+          type: 'error',
+          isVisible: true,
+        });
+      }
+    } catch {
+      setToast({
+        message: 'An error occurred. Please try again later.',
+        type: 'error',
+        isVisible: true,
+      });
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
     <section className="py-24 bg-cream">
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast({ ...toast, isVisible: false })}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="bg-white rounded-3xl shadow-card overflow-hidden">
@@ -45,7 +223,7 @@ export default function CTA() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Your name
+                        Your name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -53,12 +231,20 @@ export default function CTA() {
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="e.g. John Smith"
-                        className="w-full"
+                        disabled={isSubmitting}
+                        className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:ring-1 ${
+                          errors.name
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-200 focus:border-navy focus:ring-navy'
+                        } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                       />
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email address
+                        Email address <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -66,8 +252,16 @@ export default function CTA() {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="e.g. john@email.com"
-                        className="w-full"
+                        disabled={isSubmitting}
+                        className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:ring-1 ${
+                          errors.email
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-200 focus:border-navy focus:ring-navy'
+                        } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                       />
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      )}
                     </div>
                   </div>
 
@@ -76,13 +270,11 @@ export default function CTA() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Phone number
                       </label>
-                      <input
-                        type="tel"
-                        name="phone"
+                      <PhoneInput
                         value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="e.g. +1 222 444 66"
-                        className="w-full"
+                        onChange={handlePhoneChange}
+                        disabled={isSubmitting}
+                        error={errors.phone}
                       />
                     </div>
                     <div>
@@ -95,14 +287,17 @@ export default function CTA() {
                         value={formData.company}
                         onChange={handleChange}
                         placeholder="e.g. Execor"
-                        className="w-full"
+                        disabled={isSubmitting}
+                        className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:ring-1 border-gray-200 focus:border-navy focus:ring-navy ${
+                          isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''
+                        }`}
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Your message
+                      Your message <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       name="message"
@@ -110,15 +305,34 @@ export default function CTA() {
                       onChange={handleChange}
                       placeholder="Type here ..."
                       rows={4}
-                      className="w-full resize-none"
+                      disabled={isSubmitting}
+                      className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:ring-1 resize-none ${
+                        errors.message
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                          : 'border-gray-200 focus:border-navy focus:ring-navy'
+                      } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     ></textarea>
+                    {errors.message && (
+                      <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                    )}
                   </div>
 
                   <button
                     type="submit"
-                    className="btn-primary"
+                    disabled={isSubmitting}
+                    className={`btn-primary ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
-                    Send
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : (
+                      'Send'
+                    )}
                   </button>
                 </form>
               </div>
@@ -228,18 +442,48 @@ export default function CTA() {
                 our monthly look at the critical issues facing global businesses.
               </p>
             </div>
-            <div className="flex gap-4 w-full md:w-auto">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-1 md:w-80"
-              />
-              <button className="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center hover:bg-navy-700 hover:scale-105 transition-all flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
-              </button>
-            </div>
+            <form onSubmit={handleNewsletterSubmit} className="w-full md:w-auto">
+              <div className="flex gap-4">
+                <div className="flex-1 md:w-80">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => {
+                      setNewsletterEmail(e.target.value);
+                      if (newsletterError) setNewsletterError('');
+                    }}
+                    placeholder="Your email address"
+                    disabled={isSubscribing}
+                    className={`w-full px-4 py-3 border rounded-xl transition-all focus:outline-none focus:ring-1 ${
+                      newsletterError
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-200 focus:border-navy focus:ring-navy'
+                    } ${isSubscribing ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  />
+                  {newsletterError && (
+                    <p className="mt-1 text-sm text-red-600">{newsletterError}</p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubscribing}
+                  className={`w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center hover:bg-navy-700 hover:scale-105 transition-all flex-shrink-0 ${
+                    isSubscribing ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isSubscribing ? (
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </ScrollReveal>
       </div>
