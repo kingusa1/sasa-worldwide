@@ -5,8 +5,8 @@ import Link from 'next/link';
 const leadership = [
   {
     name: 'Salah Elgemiabby',
-    role: 'Chief Executive Officer',
-    shortRole: 'CEO',
+    role: 'Co-Founder & Executive Director',
+    shortRole: 'Co-Founder',
     initials: 'SE',
     color: 'from-blue-500 to-blue-700',
     bio: 'Salah brings visionary leadership and strategic direction to SASA Worldwide. With extensive experience in sales operations and business development across the UAE, he has built SASA into a leading performance growth engine. His focus on excellence and innovation drives the company\'s mission to transform sales operations.',
@@ -14,8 +14,8 @@ const leadership = [
   },
   {
     name: 'Adam Qureshi',
-    role: 'Chief Sales Officer',
-    shortRole: 'CSO',
+    role: 'Co-Founder & Executive Director',
+    shortRole: 'Co-Founder',
     initials: 'AQ',
     color: 'from-teal-500 to-teal-700',
     bio: 'Adam leads SASA\'s sales strategy and client acquisition efforts. His deep understanding of the UAE market and proven track record in building high-performing sales teams ensures that SASA consistently delivers exceptional results for clients across all seven Emirates.',
