@@ -173,23 +173,26 @@ body {
 }
 
 /* Form Styles */
-input, textarea {
+input,
+textarea {
   width: 100%;
   padding: 16px 20px;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 16px;
   transition: all 0.3s ease;
   background: var(--white);
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
   outline: none;
   border-color: var(--primary-navy);
   box-shadow: 0 0 0 3px rgba(0, 46, 89, 0.1);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: #a0aec0;
 }
 
@@ -260,6 +263,7 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -270,6 +274,7 @@ input::placeholder, textarea::placeholder {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -280,6 +285,7 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -291,6 +297,7 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -302,6 +309,7 @@ input::placeholder, textarea::placeholder {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -309,18 +317,24 @@ input::placeholder, textarea::placeholder {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
 }
 
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -328,9 +342,12 @@ input::placeholder, textarea::placeholder {
 
 /* Floating animation for decorative elements */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-20px);
   }
@@ -369,12 +386,29 @@ input::placeholder, textarea::placeholder {
 }
 
 /* Stagger delays for grid items */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
-.delay-600 { animation-delay: 600ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-600 {
+  animation-delay: 600ms;
+}
 
 /* Initial state for animated elements */
 .animate-on-scroll {

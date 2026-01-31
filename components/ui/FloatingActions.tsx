@@ -90,11 +90,10 @@ export default function FloatingActions() {
     <>
       {/* Choice Menu - appears when button is clicked */}
       <div
-        className={`fixed z-50 transition-all duration-300 ease-out ${
-          viewState === 'menu'
-            ? 'opacity-100 scale-100 pointer-events-auto'
-            : 'opacity-0 scale-95 pointer-events-none'
-        } bottom-20 sm:bottom-24 right-4 sm:right-6 left-4 sm:left-auto`}
+        className={`fixed z-[60] transition-all duration-300 ease-out ${viewState === 'menu'
+          ? 'opacity-100 scale-100 pointer-events-auto'
+          : 'opacity-0 scale-95 pointer-events-none'
+          } bottom-24 sm:bottom-24 right-4 sm:right-6 left-4 sm:left-auto safe-area-bottom`}
       >
         <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden w-full sm:w-72 sm:ml-auto">
           {/* Header */}
@@ -162,11 +161,10 @@ export default function FloatingActions() {
       {/* Chat Window - opens when AI Assistant is selected */}
       {/* Mobile: full screen with safe area | Desktop: fixed size panel */}
       <div
-        className={`fixed z-50 transition-all duration-500 ease-out ${
-          viewState === 'chat'
-            ? 'opacity-100 scale-100 pointer-events-auto'
-            : 'opacity-0 scale-95 pointer-events-none'
-        } inset-0 sm:inset-auto sm:bottom-24 sm:right-6 sm:w-[380px] sm:h-[520px]`}
+        className={`fixed z-50 transition-all duration-500 ease-out ${viewState === 'chat'
+          ? 'opacity-100 scale-100 pointer-events-auto'
+          : 'opacity-0 scale-95 pointer-events-none'
+          } inset-0 sm:inset-auto sm:bottom-24 sm:right-6 sm:w-[380px] sm:h-[520px]`}
       >
         <div className="h-full bg-white sm:rounded-3xl shadow-2xl overflow-hidden border-0 sm:border sm:border-gray-100 flex flex-col">
           {/* Header */}
@@ -213,7 +211,7 @@ export default function FloatingActions() {
       </div>
 
       {/* Single Floating Button */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+      <div className="fixed bottom-8 right-4 sm:bottom-8 sm:right-6 z-[60] safe-area-bottom">
         <button
           onClick={handleButtonClick}
           className="group relative transition-all duration-300"
@@ -225,15 +223,13 @@ export default function FloatingActions() {
           )}
 
           {/* Button container */}
-          <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center group-hover:scale-105 active:scale-95 ${
-            viewState === 'closed'
-              ? 'bg-gradient-to-br from-navy to-navy/80'
-              : 'bg-gray-100'
-          }`}>
+          <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center group-hover:scale-105 active:scale-95 ${viewState === 'closed'
+            ? 'bg-gradient-to-br from-navy to-navy/80'
+            : 'bg-gray-100'
+            }`}>
             {/* Inner border */}
-            <div className={`absolute inset-1 rounded-full border ${
-              viewState === 'closed' ? 'border-white/20' : 'border-gray-200'
-            }`}></div>
+            <div className={`absolute inset-1 rounded-full border ${viewState === 'closed' ? 'border-white/20' : 'border-gray-200'
+              }`}></div>
 
             {viewState === 'closed' ? (
               <>
@@ -273,11 +269,10 @@ export default function FloatingActions() {
       {/* Backdrop - always show on mobile when open */}
       {viewState !== 'closed' && (
         <div
-          className={`fixed inset-0 z-40 transition-all ${
-            viewState === 'chat'
-              ? 'bg-black/50 sm:bg-black/20 sm:backdrop-blur-none'
-              : 'bg-black/30 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none'
-          }`}
+          className={`fixed inset-0 z-40 transition-all ${viewState === 'chat'
+            ? 'bg-black/50 sm:bg-black/20 sm:backdrop-blur-none'
+            : 'bg-black/30 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none'
+            }`}
           onClick={handleClose}
         />
       )}
