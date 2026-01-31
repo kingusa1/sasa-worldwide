@@ -254,6 +254,12 @@ textarea::placeholder {
   }
 }
 
+/* Safe Area Support for iPhone X+ */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* ==================== */
 /* Animation Keyframes  */
 /* ==================== */
