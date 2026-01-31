@@ -26,6 +26,7 @@ const navLinks = [
     ]
   },
   { href: '/partnerships', label: 'Partnerships' },
+  { href: '/blog', label: 'Insights' },
   { href: '/careers', label: 'Career Path' },
   { href: '/recruitment', label: 'Recruitment' },
   { href: '/csr', label: 'CSR' },

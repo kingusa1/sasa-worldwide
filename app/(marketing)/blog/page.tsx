@@ -1,11 +1,13 @@
 import Link from 'next/link';
+import { getAllPosts, BlogPost } from '@/lib/google-sheets';
 
 export const metadata = {
   title: 'Insights & Blog | SASA Worldwide',
-  description: 'Expert insights on sales operations, field force management, and growth strategies for businesses in the UAE.',
+  description: 'Expert insights on sales operations, field sales management, AI in sales, and growth strategies for businesses in the UAE.',
 };
 
-const posts = [
+// Fallback posts (existing content)
+const fallbackPosts = [
   {
     slug: 'outsourcing-sales-operations-transform-business',
     title: 'How Outsourcing Sales Operations Can Transform Your Business',
@@ -62,7 +64,54 @@ const posts = [
   },
 ];
 
-export default function BlogPage() {
+// Format date for display
+function formatDate(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+// Convert Google Sheets post to display format
+function convertPost(post: BlogPost) {
+  return {
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    date: formatDate(post.date),
+    category: post.category,
+    readTime: post.readTime,
+    image: post.image,
+  };
+}
+
+export default async function BlogPage() {
+  // Fetch posts from Google Sheets
+  let sheetsPosts: BlogPost[] = [];
+  try {
+    sheetsPosts = await getAllPosts();
+  } catch (error) {
+    console.error('Error fetching posts from Google Sheets:', error);
+  }
+
+  // Convert and combine posts (Google Sheets posts first, then fallback)
+  const googlePosts = sheetsPosts.map(convertPost);
+
+  // Get slugs from Google Sheets to avoid duplicates
+  const sheetSlugs = new Set(googlePosts.map(p => p.slug));
+
+  // Filter fallback posts to exclude any that exist in Google Sheets
+  const uniqueFallbackPosts = fallbackPosts.filter(p => !sheetSlugs.has(p.slug));
+
+  // Combine: Google Sheets posts first (newest), then fallback posts
+  const posts = [...googlePosts, ...uniqueFallbackPosts];
+
   return (
     <>
       {/* Hero Section */}
@@ -83,49 +132,51 @@ export default function BlogPage() {
             Sales Operations Insights
           </h1>
           <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-            Expert perspectives on field sales, growth strategies, and operational excellence in the UAE market.
+            Expert perspectives on field sales, AI in sales, growth strategies, and operational excellence in the UAE market.
           </p>
         </div>
       </section>
 
       {/* Featured Post */}
-      <section className="py-16 bg-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="section-badge text-navy mb-8 block">FEATURED ARTICLE</span>
+      {posts.length > 0 && (
+        <section className="py-16 bg-cream">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <span className="section-badge text-navy mb-8 block">FEATURED ARTICLE</span>
 
-          <Link href={`/blog/${posts[0].slug}`} className="block group">
-            <div className="grid lg:grid-cols-2 gap-8 bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300">
-              <div className="relative h-64 lg:h-auto min-h-[300px]">
-                <div
-                  className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
-                  style={{ backgroundImage: `url("${posts[0].image}")` }}
-                />
-              </div>
-              <div className="p-8 lg:p-12 flex flex-col justify-center">
-                <div className="flex items-center gap-4 text-sm mb-4">
-                  <span className="bg-navy/10 text-navy px-3 py-1 rounded-full font-medium">
-                    {posts[0].category}
-                  </span>
-                  <span className="text-gray-500">{posts[0].readTime}</span>
+            <Link href={`/blog/${posts[0].slug}`} className="block group">
+              <div className="grid lg:grid-cols-2 gap-8 bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300">
+                <div className="relative h-64 lg:h-auto min-h-[300px]">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                    style={{ backgroundImage: `url("${posts[0].image}")` }}
+                  />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-navy mb-4 group-hover:text-navy/80 transition-colors">
-                  {posts[0].title}
-                </h2>
-                <p className="text-gray-600 mb-6">{posts[0].excerpt}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">{posts[0].date}</span>
-                  <span className="text-navy font-medium group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                    Read Article
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </span>
+                <div className="p-8 lg:p-12 flex flex-col justify-center">
+                  <div className="flex items-center gap-4 text-sm mb-4">
+                    <span className="bg-navy/10 text-navy px-3 py-1 rounded-full font-medium">
+                      {posts[0].category}
+                    </span>
+                    <span className="text-gray-500">{posts[0].readTime}</span>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-navy mb-4 group-hover:text-navy/80 transition-colors">
+                    {posts[0].title}
+                  </h2>
+                  <p className="text-gray-600 mb-6">{posts[0].excerpt}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">{posts[0].date}</span>
+                    <span className="text-navy font-medium group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
+                      Read Article
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        </div>
-      </section>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Blog Posts Grid */}
       <section className="py-16 bg-white">

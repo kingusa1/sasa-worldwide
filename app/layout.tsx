@@ -11,12 +11,12 @@ export const metadata: Metadata = {
   description: "UAE-based sales operations and Sales as a Service company delivering structured, scalable, and high-performance activation programs across all seven Emirates.",
   icons: {
     icon: [
-      { url: '/images/logo/cropped-sasa-logo.png', type: 'image/png' },
+      { url: '/images/logo/favicon-square.png', type: 'image/png' },
     ],
     apple: [
-      { url: '/images/logo/cropped-sasa-logo.png', sizes: '180x180', type: 'image/png' },
+      { url: '/images/logo/favicon-square.png', sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: '/images/logo/cropped-sasa-logo.png',
+    shortcut: '/images/logo/favicon-square.png',
   },
 };
 
