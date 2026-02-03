@@ -1,7 +1,31 @@
 import { ScoredArticle } from './scoring';
+import { getOpenRouterApiKey } from './ai-credentials';
 
-const POLLINATIONS_BASE_URL = process.env.POLLINATIONS_BASE_URL || 'https://text.pollinations.ai/openai';
-const POLLINATIONS_MODEL = process.env.POLLINATIONS_MODEL || 'openai';
+// API Endpoints
+const OPENROUTER_API = 'https://openrouter.ai/api/v1/chat/completions';
+const POLLINATIONS_API = 'https://text.pollinations.ai/openai';
+
+// All Pollinations models for fallback
+const POLLINATIONS_MODELS = [
+  'openai',
+  'openai-fast',
+  'openai-large',
+  'mistral',
+  'gemini',
+  'gemini-fast',
+  'gemini-large',
+  'deepseek',
+  'qwen-coder',
+  'grok',
+  'claude-fast',
+  'claude',
+  'kimi',
+  'nova-fast',
+  'glm',
+  'minimax',
+  'perplexity-fast',
+  'perplexity-reasoning',
+];
 
 // SASA brand voice system prompt (from your n8n workflow)
 const SYSTEM_PROMPT = `You are a Content Writer for SASA Worldwide, a UAE-based sales operations company. You create professional, engaging blog posts that establish thought leadership.
@@ -43,10 +67,9 @@ interface BlogContent {
   category: string;
 }
 
-// Generate blog post content using Pollinations AI
-export async function generateBlogPost(article: ScoredArticle, articleContent: string): Promise<BlogContent | null> {
-  try {
-    const userPrompt = `Create a professional blog post based on this news article:
+// Build the user prompt for blog generation
+function buildBlogPrompt(article: ScoredArticle, articleContent: string): string {
+  return `Create a professional blog post based on this news article:
 
 ARTICLE TITLE: ${article.title}
 ARTICLE SOURCE: ${article.source}
@@ -86,40 +109,122 @@ EXAMPLE FORMAT:
 <li>Bullet point one</li>
 <li>Bullet point two</li>
 </ul>`;
+}
 
-    const response = await fetch(`${POLLINATIONS_BASE_URL}/v1/chat/completions`, {
+// Try OpenRouter for blog generation
+async function tryOpenRouterBlog(messages: Array<{ role: string; content: string }>): Promise<string | null> {
+  const apiKey = getOpenRouterApiKey();
+  if (!apiKey) {
+    console.log('[Blog AI] OpenRouter not connected');
+    return null;
+  }
+
+  try {
+    console.log('[Blog AI] Trying OpenRouter...');
+    const response = await fetch(OPENROUTER_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://sasa-worldwide.com',
+        'X-Title': 'SASA Blog Generator',
       },
       body: JSON.stringify({
-        model: POLLINATIONS_MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
+        model: 'openai/gpt-4o-mini',
+        messages,
         temperature: 0.7,
         max_tokens: 2000,
       }),
     });
 
     if (!response.ok) {
-      console.error('Pollinations API error:', response.status, response.statusText);
+      console.error('[Blog AI] OpenRouter error:', response.status);
       return null;
     }
 
     const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content || '';
+    const content = data.choices?.[0]?.message?.content;
+    if (content) {
+      console.log('[Blog AI] SUCCESS: OpenRouter');
+      return content;
+    }
+    return null;
+  } catch (error) {
+    console.error('[Blog AI] OpenRouter failed:', error);
+    return null;
+  }
+}
+
+// Try a single Pollinations model for blog generation
+async function tryPollinationsModelBlog(model: string, messages: Array<{ role: string; content: string }>): Promise<string | null> {
+  try {
+    const response = await fetch(`${POLLINATIONS_API}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || null;
+  } catch {
+    return null;
+  }
+}
+
+// Try all Pollinations models for blog generation
+async function tryAllPollinationsBlog(messages: Array<{ role: string; content: string }>): Promise<string | null> {
+  console.log('[Blog AI] Trying Pollinations (all models)...');
+
+  for (const model of POLLINATIONS_MODELS) {
+    console.log(`[Blog AI] Trying Pollinations model: ${model}`);
+    const content = await tryPollinationsModelBlog(model, messages);
+    if (content) {
+      console.log(`[Blog AI] SUCCESS: Pollinations ${model}`);
+      return content;
+    }
+  }
+
+  console.error('[Blog AI] All Pollinations models failed');
+  return null;
+}
+
+// Generate blog post content using AI (OpenRouter -> Pollinations fallback)
+export async function generateBlogPost(article: ScoredArticle, articleContent: string): Promise<BlogContent | null> {
+  try {
+    const userPrompt = buildBlogPrompt(article, articleContent);
+    const messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt },
+    ];
+
+    // 1. Try OpenRouter first (if connected)
+    let aiResponse = await tryOpenRouterBlog(messages);
+
+    // 2. Fallback to all Pollinations models
+    if (!aiResponse) {
+      aiResponse = await tryAllPollinationsBlog(messages);
+    }
 
     if (!aiResponse) {
-      console.error('No content in AI response');
+      console.error('[Blog AI] All AI providers failed');
       return null;
     }
 
     // Parse the AI response
     return parseAIResponse(aiResponse, article);
   } catch (error) {
-    console.error('Error generating blog post:', error);
+    console.error('[Blog AI] Error generating blog post:', error);
     return null;
   }
 }
