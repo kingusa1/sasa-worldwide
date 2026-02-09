@@ -4,6 +4,8 @@
 import { NextResponse } from 'next/server';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '@/lib/ai-credentials';
 
+export const dynamic = 'force-dynamic';
+
 const OPENROUTER_AUTH_URL = 'https://openrouter.ai/auth';
 
 export async function GET(request: Request) {
