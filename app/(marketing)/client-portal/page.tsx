@@ -85,107 +85,77 @@ export default function ClientPortalPage() {
         </div>
       </section>
 
-      {/* Two Portal Cards */}
+      {/* Training Portal Card */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <ScrollReveal>
-              <span className="section-badge mb-4">Choose Your Portal</span>
+              <span className="section-badge mb-4">SASA Academy</span>
               <h2 className="text-3xl md:text-4xl font-bold text-navy">
-                Access the Tools You Need
+                Your Complete Training & Community Hub
               </h2>
               <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-                Whether you are looking to learn new skills or connect with the community,
-                we have the right portal for you.
+                Access everything you need in one place - from courses and training materials
+                to community discussions and support resources.
               </p>
             </ScrollReveal>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Educational Portal Card */}
-            <ScrollReveal delay={100}>
-              <div className="bg-cream rounded-3xl p-10 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-navy flex items-center justify-center">
-                  <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <ScrollReveal delay={100}>
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-cream rounded-3xl p-12 hover:shadow-xl transition-all duration-300">
+                <div className="w-24 h-24 mx-auto mb-8 rounded-2xl bg-navy flex items-center justify-center">
+                  <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M12 14l9-5-9-5-9 5 9 5z" />
                     <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
                   </svg>
                 </div>
 
-                <h3 className="text-2xl font-bold text-navy mb-4 text-center">
-                  Educational Portal
+                <h3 className="text-3xl font-bold text-navy mb-4 text-center">
+                  SASA Academy Portal
                 </h3>
-                <p className="text-gray-600 text-center mb-8 leading-relaxed">
-                  Access courses, tutorials, and onboarding materials to develop your skills
-                  and maximize your performance with SASA.
+                <p className="text-gray-600 text-center mb-10 leading-relaxed text-lg">
+                  Access comprehensive training, community support, and all the resources
+                  you need to excel with SASA - all in one unified platform.
                 </p>
 
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {['Interactive courses & modules', 'Onboarding tutorials', 'Skills assessments & quizzes', 'Training certificates'].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-gray-700">
+                <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 mb-10">
+                  {[
+                    'Interactive courses & modules',
+                    'Onboarding tutorials',
+                    'Skills assessments & quizzes',
+                    'Training certificates',
+                    'Community discussions & forums',
+                    'Direct support access',
+                    'Latest news & announcements',
+                    'Resource library & downloads'
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-gray-700">
                       <span className="w-6 h-6 rounded-full bg-navy/10 flex items-center justify-center flex-shrink-0">
                         <svg className="w-4 h-4 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </span>
-                      {item}
-                    </li>
+                      <span>{item}</span>
+                    </div>
                   ))}
-                </ul>
-
-                <a
-                  href="https://sasa-worldwide.app.clientclub.net/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary w-full text-center justify-center"
-                >
-                  Access Educational Portal
-                </a>
-              </div>
-            </ScrollReveal>
-
-            {/* Community Portal Card */}
-            <ScrollReveal delay={200}>
-              <div className="bg-cream rounded-3xl p-10 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-navy flex items-center justify-center">
-                  <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
                 </div>
 
-                <h3 className="text-2xl font-bold text-navy mb-4 text-center">
-                  Community Portal
-                </h3>
-                <p className="text-gray-600 text-center mb-8 leading-relaxed">
-                  Connect with the SASA community, access support resources, and stay
-                  updated with the latest news and discussions.
-                </p>
-
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {['Community discussions & forums', 'Direct support access', 'Latest news & announcements', 'Resource library & downloads'].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-gray-700">
-                      <span className="w-6 h-6 rounded-full bg-navy/10 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 text-navy" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
                 <a
                   href="https://sasa-worldwide.app.clientclub.net/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-primary w-full text-center justify-center"
+                  className="btn-primary w-full text-center justify-center text-lg py-4"
                 >
-                  Access Community Portal
+                  Access SASA Academy Portal
+                  <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
                 </a>
               </div>
-            </ScrollReveal>
-          </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

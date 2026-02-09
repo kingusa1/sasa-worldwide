@@ -159,21 +159,21 @@ export default function AffiliateProgramPage() {
               owner, your network can turn into predictable income.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="#join"
+              <Link
+                href="/signup/affiliate"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-navy font-semibold rounded-full hover:bg-gray-100 transition-colors"
               >
                 Join the Affiliate Program
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-              </a>
-              <a
-                href="#join"
+              </Link>
+              <Link
+                href="/login"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors border border-white/20"
               >
                 Login to Dashboard
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -394,7 +394,7 @@ export default function AffiliateProgramPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/contact"
+                href="/signup/affiliate"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-navy font-semibold rounded-full hover:bg-gray-100 transition-colors"
               >
                 Join the Affiliate Program
@@ -403,7 +403,7 @@ export default function AffiliateProgramPage() {
                 </svg>
               </Link>
               <Link
-                href="/contact"
+                href="/login"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors border border-white/20"
               >
                 Login to Affiliate Dashboard
