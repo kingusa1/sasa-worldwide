@@ -12,20 +12,21 @@ export async function GET(request: Request) {
 
   try {
     // Get all pending signup requests with user details
+    // Use !signup_requests_user_id_fkey to specify which foreign key relationship to follow
     const { data, error } = await supabaseAdmin
       .from('signup_requests')
       .select(`
         id,
         status,
         requested_at,
-        user:users (
+        user:users!signup_requests_user_id_fkey (
           id,
           email,
           name,
           role,
           email_verified,
           created_at,
-          staff_profiles (
+          staff_profiles:staff_profiles!staff_profiles_user_id_fkey (
             employee_id,
             department,
             phone

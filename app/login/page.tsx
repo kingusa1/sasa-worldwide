@@ -35,8 +35,20 @@ export default function LoginPage() {
       }
 
       if (result?.ok) {
-        // Successful login - redirect based on role
-        router.push(callbackUrl);
+        // Get the session to determine role-based redirect
+        const session = await fetch('/api/auth/session').then(res => res.json());
+
+        // Redirect based on role
+        if (session?.user?.role === 'admin') {
+          router.push('/admin/signups');
+        } else if (session?.user?.role === 'staff') {
+          router.push('/staff/dashboard');
+        } else if (session?.user?.role === 'affiliate') {
+          router.push('/affiliate/dashboard');
+        } else {
+          router.push(callbackUrl);
+        }
+
         router.refresh();
       }
     } catch (err: any) {

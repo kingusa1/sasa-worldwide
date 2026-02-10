@@ -21,7 +21,7 @@ export async function POST(
     // Get the signup request
     const { data: signupRequest, error: requestError } = await supabaseAdmin
       .from('signup_requests')
-      .select('*, user:users(*)')
+      .select('*, user:users!signup_requests_user_id_fkey(*)')
       .eq('id', requestId)
       .single();
 

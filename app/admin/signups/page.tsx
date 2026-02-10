@@ -18,11 +18,11 @@ interface SignupRequest {
     role: string;
     email_verified: boolean;
     created_at: string;
-  };
-  staff_profile?: {
-    employee_id: string;
-    department: string;
-    phone: string;
+    staff_profiles?: Array<{
+      employee_id: string;
+      department: string;
+      phone: string;
+    }>;
   };
 }
 
@@ -268,12 +268,12 @@ export default function AdminSignupsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {signup.staff_profile?.department || 'N/A'}
+                        {signup.user.staff_profiles?.[0]?.department || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">
-                        {signup.staff_profile?.employee_id || 'N/A'}
+                        {signup.user.staff_profiles?.[0]?.employee_id || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -352,7 +352,7 @@ export default function AdminSignupsPage() {
                     Employee ID
                   </label>
                   <p className="text-gray-900 font-mono">
-                    {selectedSignup.staff_profile?.employee_id || 'N/A'}
+                    {selectedSignup.user.staff_profiles?.[0]?.employee_id || 'N/A'}
                   </p>
                 </div>
 
@@ -361,7 +361,7 @@ export default function AdminSignupsPage() {
                     Department
                   </label>
                   <p className="text-gray-900">
-                    {selectedSignup.staff_profile?.department || 'N/A'}
+                    {selectedSignup.user.staff_profiles?.[0]?.department || 'N/A'}
                   </p>
                 </div>
               </div>
@@ -371,7 +371,7 @@ export default function AdminSignupsPage() {
                   Phone Number
                 </label>
                 <p className="text-gray-900">
-                  {selectedSignup.staff_profile?.phone || 'Not provided'}
+                  {selectedSignup.user.staff_profiles?.[0]?.phone || 'Not provided'}
                 </p>
               </div>
 
