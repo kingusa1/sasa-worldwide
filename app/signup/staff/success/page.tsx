@@ -33,12 +33,18 @@ export default function StaffSignupSuccessPage() {
 
           <p className="text-gray-600 mb-6 leading-relaxed">
             Your staff account registration has been submitted successfully.
-            An administrator will review your application and notify you once approved.
+            Please check your email to verify your account, then wait for administrator approval.
           </p>
 
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6 text-left">
             <h3 className="text-sm font-semibold text-navy mb-2">What happens next:</h3>
             <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex items-start gap-2">
+                <svg className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Check your email and click the verification link (expires in 24 hours)</span>
+              </li>
               <li className="flex items-start gap-2">
                 <svg className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

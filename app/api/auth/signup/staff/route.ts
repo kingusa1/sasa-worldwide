@@ -19,6 +19,53 @@ export async function POST(request: Request) {
       );
     }
 
+    // VALIDATION 1: Email domain must be @sasa-worldwide.com
+    const emailDomain = email.toLowerCase().split('@')[1];
+    if (emailDomain !== 'sasa-worldwide.com') {
+      return NextResponse.json(
+        { error: 'Only @sasa-worldwide.com email addresses are allowed for staff registration' },
+        { status: 400 }
+      );
+    }
+
+    // VALIDATION 2: Employee ID must exist and be unused
+    const { data: employeeIdRecord, error: employeeIdError } = await supabaseAdmin
+      .from('employee_ids')
+      .select('*')
+      .eq('employee_id', employeeId.toUpperCase())
+      .single();
+
+    if (employeeIdError || !employeeIdRecord) {
+      return NextResponse.json(
+        { error: 'Invalid employee ID. Please contact your administrator.' },
+        { status: 400 }
+      );
+    }
+
+    // Check if employee ID is already used
+    if (employeeIdRecord.status === 'used') {
+      return NextResponse.json(
+        { error: 'This employee ID has already been used' },
+        { status: 400 }
+      );
+    }
+
+    // Check if employee ID is revoked
+    if (employeeIdRecord.status === 'revoked') {
+      return NextResponse.json(
+        { error: 'This employee ID has been revoked. Please contact your administrator.' },
+        { status: 400 }
+      );
+    }
+
+    // VALIDATION 3: Email must match the employee ID's assigned email
+    if (employeeIdRecord.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'This employee ID is not assigned to your email address' },
+        { status: 400 }
+      );
+    }
+
     // Check if user already exists
     const { data: existingUser } = await supabaseAdmin
       .from('users')
@@ -73,6 +120,21 @@ export async function POST(request: Request) {
       });
 
     if (requestError) throw requestError;
+
+    // Mark employee ID as used
+    const { error: employeeIdUpdateError } = await supabaseAdmin
+      .from('employee_ids')
+      .update({
+        status: 'used',
+        used_by: user.id,
+        used_at: new Date().toISOString(),
+      })
+      .eq('employee_id', employeeId.toUpperCase());
+
+    if (employeeIdUpdateError) {
+      console.error('Failed to mark employee ID as used:', employeeIdUpdateError);
+      // Don't fail the signup if this update fails
+    }
 
     // Generate email verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');

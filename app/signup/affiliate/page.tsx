@@ -135,15 +135,29 @@ export default function AffiliateSignupPage() {
     }
 
     try {
-      // TODO: Implement affiliate signup with instant access
-      console.log('Affiliate signup:', { ...formData, role: 'affiliate' });
+      const response = await fetch('/api/auth/signup/affiliate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone || null,
+        }),
+      });
 
-      // Redirect to thank you page
-      // window.location.href = '/signup/affiliate/success';
+      const data = await response.json();
 
-      setError('Registration not yet implemented. Coming soon!');
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      // Success! Redirect to success page
+      window.location.href = '/signup/affiliate/success';
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

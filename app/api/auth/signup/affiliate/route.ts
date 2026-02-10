@@ -7,7 +7,7 @@ import { WelcomeEmail } from '@/emails/WelcomeEmail';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, name, company, website } = body;
+    const { email, password, name, phone } = body;
 
     // Validate required fields
     if (!email || !password || !name) {
@@ -50,6 +50,21 @@ export async function POST(request: Request) {
 
     if (userError) throw userError;
 
+    // Create affiliate profile with referral code
+    const referralCode = `SASA-${user.id.substring(0, 8).toUpperCase()}`;
+    const { error: profileError } = await supabaseAdmin
+      .from('affiliate_profiles')
+      .insert({
+        user_id: user.id,
+        phone: phone || null,
+        referral_code: referralCode,
+      });
+
+    if (profileError) {
+      console.error('Failed to create affiliate profile:', profileError);
+      // Don't fail the signup if profile creation fails
+    }
+
     // Send welcome email
     try {
       await sendEmailSMTP({
@@ -68,7 +83,7 @@ export async function POST(request: Request) {
     await supabaseAdmin.from('audit_logs').insert({
       user_id: user.id,
       action: 'signup',
-      details: { role: 'affiliate', company, website },
+      metadata: { role: 'affiliate', phone: phone || null, referral_code: referralCode },
     });
 
     return NextResponse.json({

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Html,
   Head,
@@ -7,6 +8,7 @@ import {
   Button,
   Section,
   Hr,
+  Img,
 } from '@react-email/components';
 
 interface AccountApprovedEmailProps {

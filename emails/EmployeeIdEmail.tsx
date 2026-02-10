@@ -11,12 +11,12 @@ import {
   Img,
 } from '@react-email/components';
 
-interface WelcomeEmailProps {
-  name: string;
-  verificationUrl: string;
+interface EmployeeIdEmailProps {
+  employeeId: string;
+  signupUrl: string;
 }
 
-export function WelcomeEmail({ name, verificationUrl }: WelcomeEmailProps) {
+export function EmployeeIdEmail({ employeeId, signupUrl }: EmployeeIdEmailProps) {
   const logoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/images/logo/sasa-logo-color.png`;
 
   return (
@@ -40,48 +40,59 @@ export function WelcomeEmail({ name, verificationUrl }: WelcomeEmailProps) {
             {/* Welcome Icon */}
             <Section style={iconContainer}>
               <div style={iconCircle}>
-                <Text style={icon}>✨</Text>
+                <Text style={icon}>🎉</Text>
               </div>
             </Section>
 
-            <Text style={heading}>Welcome to SASA Worldwide!</Text>
-            <Text style={subtitle}>Hi {name},</Text>
+            <Text style={heading}>Your Employee ID is Ready!</Text>
 
             <Text style={paragraph}>
-              Thank you for signing up with SASA Worldwide. We're thrilled to have you join our team!
-              Your account is currently under review by our administrators.
+              Welcome to SASA Worldwide! Your administrator has created an employee account for you.
             </Text>
 
-            {/* Verification Box */}
-            <Section style={highlightBox}>
-              <Text style={highlightTitle}>🔐 Email Verification Required</Text>
-              <Text style={highlightText}>
-                Please verify your email address to proceed with your account activation.
-              </Text>
+            {/* Employee ID Box */}
+            <Section style={employeeIdBox}>
+              <Text style={employeeIdLabel}>Your Employee ID:</Text>
+              <Text style={employeeIdValue}>{employeeId}</Text>
             </Section>
+
+            <Text style={paragraph}>
+              You can now use this employee ID to create your staff account and access the SASA Worldwide portal.
+            </Text>
 
             {/* CTA Button */}
             <Section style={buttonContainer}>
-              <Button style={button} href={verificationUrl}>
-                ✓ Verify My Email Address
+              <Button style={button} href={signupUrl}>
+                ✓ Create Your Account
               </Button>
             </Section>
 
-            <Text style={paragraph}>
-              After email verification, you'll receive a notification once your account is approved
-              by our administrators. This usually takes 24-48 hours.
-            </Text>
-
             <Hr style={divider} />
 
-            {/* Info Box */}
+            {/* Instructions Box */}
             <Section style={infoBox}>
+              <Text style={infoTitle}>📋 Registration Instructions</Text>
               <Text style={infoText}>
-                <strong>⏰ Link expires in 24 hours</strong>
+                1. Click the button above to go to the registration page
                 <br />
-                If you didn't create this account, please ignore this email. Your security is our priority.
+                2. Enter your information including the employee ID above
+                <br />
+                3. Use your @sasa-worldwide.com email address
+                <br />
+                4. Create a strong password
+                <br />
+                5. Submit your registration
+                <br />
+                6. Verify your email address
+                <br />
+                7. Wait for admin approval (usually 24-48 hours)
               </Text>
             </Section>
+
+            <Text style={footnote}>
+              <strong>Important:</strong> This employee ID can only be used once. If you have any questions,
+              please contact HR at hr@sasa-worldwide.com or call +971 4 584 3777.
+            </Text>
           </Section>
 
           {/* Footer */}
@@ -152,7 +163,7 @@ const iconCircle = {
   width: '80px',
   height: '80px',
   borderRadius: '50%',
-  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
   textAlign: 'center' as const,
   lineHeight: '80px',
 };
@@ -171,13 +182,6 @@ const heading = {
   lineHeight: '1.2',
 };
 
-const subtitle = {
-  fontSize: '20px',
-  color: '#64748b',
-  margin: '0 0 32px 0',
-  textAlign: 'center' as const,
-};
-
 const paragraph = {
   fontSize: '16px',
   lineHeight: '28px',
@@ -185,26 +189,31 @@ const paragraph = {
   margin: '16px 0',
 };
 
-const highlightBox = {
+const employeeIdBox = {
   backgroundColor: '#eff6ff',
-  border: '2px solid #3b82f6',
-  borderRadius: '12px',
-  padding: '24px',
+  border: '3px solid #002E59',
+  borderRadius: '16px',
+  padding: '32px',
   margin: '32px 0',
+  textAlign: 'center' as const,
 };
 
-const highlightTitle = {
-  fontSize: '18px',
-  fontWeight: 'bold',
-  color: '#1e40af',
+const employeeIdLabel = {
+  fontSize: '14px',
+  fontWeight: '600',
+  color: '#64748b',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '1px',
   margin: '0 0 12px 0',
 };
 
-const highlightText = {
-  fontSize: '16px',
-  lineHeight: '24px',
-  color: '#1e3a8a',
+const employeeIdValue = {
+  fontSize: '36px',
+  fontWeight: 'bold',
+  color: '#002E59',
+  letterSpacing: '2px',
   margin: '0',
+  fontFamily: 'monospace',
 };
 
 const buttonContainer = {
@@ -231,18 +240,36 @@ const divider = {
 };
 
 const infoBox = {
-  backgroundColor: '#fef3c7',
-  border: '1px solid #fde047',
+  backgroundColor: '#f8fafc',
+  border: '1px solid #e2e8f0',
   borderRadius: '12px',
-  padding: '20px',
+  padding: '24px',
   margin: '24px 0',
+};
+
+const infoTitle = {
+  fontSize: '18px',
+  fontWeight: 'bold',
+  color: '#002E59',
+  margin: '0 0 16px 0',
 };
 
 const infoText = {
   fontSize: '14px',
-  lineHeight: '22px',
-  color: '#92400e',
+  lineHeight: '24px',
+  color: '#475569',
   margin: '0',
+};
+
+const footnote = {
+  fontSize: '14px',
+  lineHeight: '22px',
+  color: '#64748b',
+  margin: '24px 0 0 0',
+  padding: '20px',
+  backgroundColor: '#fef3c7',
+  border: '1px solid #fde047',
+  borderRadius: '12px',
 };
 
 const footer = {
@@ -274,4 +301,4 @@ const footerLink = {
   textDecoration: 'none',
 };
 
-export default WelcomeEmail;
+export default EmployeeIdEmail;

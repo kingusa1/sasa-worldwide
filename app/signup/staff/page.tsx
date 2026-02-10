@@ -21,7 +21,11 @@ export default function StaffSignupPage() {
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    if (!emailRegex.test(email)) return false;
+
+    // Check for @sasa-worldwide.com domain
+    const domain = email.toLowerCase().split('@')[1];
+    return domain === 'sasa-worldwide.com';
   };
 
   const validatePhone = (phone: string): boolean => {
@@ -56,8 +60,12 @@ export default function StaffSignupPage() {
         }
         break;
       case 'email':
-        if (!validateEmail(value)) {
-          errors.email = 'Please enter a valid work email address';
+        if (!value) {
+          errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.email = 'Please enter a valid email address';
+        } else if (!value.toLowerCase().endsWith('@sasa-worldwide.com')) {
+          errors.email = 'Only @sasa-worldwide.com email addresses are allowed';
         } else {
           delete errors.email;
         }
@@ -125,7 +133,7 @@ export default function StaffSignupPage() {
     }
 
     if (!validateEmail(formData.email)) {
-      setError('Please enter a valid work email address');
+      setError('Please enter a valid @sasa-worldwide.com email address');
       setLoading(false);
       return;
     }
@@ -168,15 +176,31 @@ export default function StaffSignupPage() {
     }
 
     try {
-      // TODO: Implement staff signup with admin approval
-      console.log('Staff signup:', { ...formData, role: 'staff' });
+      const response = await fetch('/api/auth/signup/staff', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          department: formData.department,
+          employeeId: formData.employeeId,
+        }),
+      });
 
-      // Redirect to pending approval page
-      // window.location.href = '/signup/staff/success';
+      const data = await response.json();
 
-      setError('Registration not yet implemented. Coming soon!');
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      // Success! Redirect to success page
+      window.location.href = '/signup/staff/success';
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
