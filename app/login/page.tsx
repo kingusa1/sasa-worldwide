@@ -1,10 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'staff' | 'affiliate'>('staff');
@@ -17,13 +23,24 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // TODO: Implement NextAuth login
-      console.log('Login attempt:', { email, role });
+      const result = await signIn('credentials', {
+        email: email.toLowerCase().trim(),
+        password,
+        redirect: false,
+      });
 
-      // Placeholder - will be replaced with NextAuth signIn()
-      setError('Authentication not yet implemented. Coming soon!');
-    } catch (err) {
-      setError('Login failed. Please try again.');
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+
+      if (result?.ok) {
+        // Successful login - redirect based on role
+        router.push(callbackUrl);
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

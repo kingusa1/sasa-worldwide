@@ -17,12 +17,19 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
 
     try {
-      // TODO: Implement password reset
-      console.log('Password reset request for:', email);
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSuccess(true);
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+      } else {
+        setError(data.error || 'Failed to send reset email. Please try again.');
+      }
     } catch (err) {
       setError('Failed to send reset email. Please try again.');
     } finally {
