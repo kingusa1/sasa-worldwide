@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth/config';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { UserManagement } from '@/components/admin/UserManagement';
 

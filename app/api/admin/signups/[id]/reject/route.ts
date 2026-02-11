@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/config';
+import { auth } from '@/auth';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { sendEmailSMTP } from '@/lib/email/smtp-client';
 import { AccountRejectedEmail } from '@/emails/AccountRejectedEmail';

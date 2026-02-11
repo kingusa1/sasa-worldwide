@@ -41,7 +41,8 @@
       "Bash(node test-all-logins.js:*)",
       "Bash(pip install:*)",
       "Bash(python -m polymcp:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''app\\\\admin'',''app\\\\api\\\\admin'' -Filter ''*.ts*'' -Recurse | ForEach-Object { \\(Get-Content $_FullName\\) -replace ''@/lib/auth/config'', ''@/auth'' | Set-Content $_FullName }\")"
     ]
   }
 }

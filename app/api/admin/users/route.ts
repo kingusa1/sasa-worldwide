@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/config';
+import { auth } from '@/auth';
 import { supabaseAdmin } from '@/lib/supabase/server';
 
 // GET - List all users
