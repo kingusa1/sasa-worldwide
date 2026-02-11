@@ -12,7 +12,7 @@ export async function sendEmail({
   template: ReactElement;
 }) {
   try {
-    const html = render(template);
+    const html = await render(template);
 
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,

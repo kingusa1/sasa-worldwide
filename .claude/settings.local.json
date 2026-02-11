@@ -38,7 +38,10 @@
       "Bash(node test-login.js:*)",
       "Bash(node fix-admin-password.js:*)",
       "Bash(node create-test-users.js:*)",
-      "Bash(node test-all-logins.js:*)"
+      "Bash(node test-all-logins.js:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m polymcp:*)",
+      "Bash(python:*)"
     ]
   }
 }

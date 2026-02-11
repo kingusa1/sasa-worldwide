@@ -80,7 +80,12 @@ async function testAllEmails() {
       subject: '[TEST] Password Changed - SASA Worldwide',
       template: PasswordChangedEmail({
         name: 'Mohamed Hisham',
-        supportEmail: 'it@sasa-worldwide.com',
+        timestamp: new Date().toLocaleString('en-US', {
+          dateStyle: 'full',
+          timeStyle: 'long',
+          timeZone: 'Asia/Dubai'
+        }),
+        supportUrl: `${process.env.NEXT_PUBLIC_APP_URL}/contact`,
       }),
     });
     console.log('✅ Password Changed Email sent!\n');

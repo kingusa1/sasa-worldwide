@@ -80,7 +80,12 @@ export async function POST(request: Request) {
         subject: 'Password Changed - SASA Worldwide',
         template: PasswordChangedEmail({
           name: user.name,
-          supportEmail: process.env.ADMIN_EMAIL || 'it@sasa-worldwide.com',
+          timestamp: new Date().toLocaleString('en-US', {
+            dateStyle: 'full',
+            timeStyle: 'long',
+            timeZone: 'Asia/Dubai'
+          }),
+          supportUrl: `${process.env.NEXT_PUBLIC_APP_URL}/contact`,
         }),
       });
     } catch (emailError) {

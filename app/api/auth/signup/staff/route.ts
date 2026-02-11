@@ -173,9 +173,14 @@ export async function POST(request: Request) {
         template: NewSignupNotification({
           name: user.name,
           email: user.email,
-          role: 'Staff',
           department,
           employeeId,
+          phone: phone || undefined,
+          requestedAt: new Date().toLocaleString('en-US', {
+            dateStyle: 'full',
+            timeStyle: 'short',
+            timeZone: 'Asia/Dubai'
+          }),
           reviewUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/signups`,
         }),
       });

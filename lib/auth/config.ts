@@ -107,7 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.role = user.role;
         token.status = user.status;
-        token.emailVerified = user.emailVerified;
+        token.emailVerified = !!user.emailVerified;
       }
       return token;
     },
@@ -117,7 +117,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id;
         session.user.role = token.role as 'staff' | 'affiliate' | 'admin';
         session.user.status = token.status as 'pending' | 'active' | 'suspended' | 'rejected';
-        session.user.emailVerified = token.emailVerified;
+        session.user.emailVerified = token.emailVerified as any;
       }
       return session;
     },
