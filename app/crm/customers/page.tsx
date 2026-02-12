@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Users, Plus, Download } from 'lucide-react';
+import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function CustomersPage() {
   const session = await auth();
@@ -23,6 +24,7 @@ export default async function CustomersPage() {
 
   // Fetch customers - try with join, fallback to basic query
   let customers: any[] = [];
+  let crmError: string | null = null;
   try {
     const { data, error } = await supabaseAdmin
       .from('customers')
@@ -34,17 +36,20 @@ export default async function CustomersPage() {
       .limit(100);
 
     if (error) {
+      crmError = `Join query failed: ${error.message} (using fallback)`;
       console.error('[SASA CRM] Join query failed, trying basic:', error.message);
-      const { data: basicData } = await supabaseAdmin
+      const { data: basicData, error: basicError } = await supabaseAdmin
         .from('customers')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
+      if (basicError) crmError = `Customers query failed: ${basicError.message}`;
       customers = (basicData || []).map((c: any) => ({ ...c, sales_transactions: [] }));
     } else {
       customers = data || [];
     }
   } catch (err: any) {
+    crmError = `Customers fetch error: ${err.message}`;
     console.error('[SASA CRM] Error fetching customers:', err.message);
   }
 
@@ -75,6 +80,12 @@ export default async function CustomersPage() {
             </Link>
           </div>
         </div>
+
+        {crmError && (
+          <div className="mb-6">
+            <ServerError title="CRM data loading error" message={crmError} />
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

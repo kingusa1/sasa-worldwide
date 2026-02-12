@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function AdminDashboardPage() {
   const session = await auth();
@@ -10,51 +11,69 @@ export default async function AdminDashboardPage() {
     redirect('/login');
   }
 
-  // Fetch all dashboard statistics in parallel
-  const [
-    usersResult,
-    pendingSignupsResult,
-    activeStaffResult,
-    activeAffiliatesResult,
-    unusedEmployeeIdsResult,
-    recentSignupsResult,
-    projectsResult,
-    activeProjectsResult,
-    transactionsResult,
-    vouchersAvailableResult,
-    vouchersSoldResult,
-    customersResult,
-  ] = await Promise.all([
-    supabaseAdmin.from('users').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('signup_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabaseAdmin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'staff').eq('status', 'active'),
-    supabaseAdmin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'affiliate').eq('status', 'active'),
-    supabaseAdmin.from('employee_ids').select('*', { count: 'exact', head: true }).eq('status', 'unused'),
-    supabaseAdmin
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-    supabaseAdmin.from('projects').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-    supabaseAdmin.from('sales_transactions').select('amount').eq('payment_status', 'succeeded'),
-    supabaseAdmin.from('voucher_codes').select('*', { count: 'exact', head: true }).eq('status', 'available'),
-    supabaseAdmin.from('voucher_codes').select('*', { count: 'exact', head: true }).eq('status', 'sold'),
-    supabaseAdmin.from('customers').select('*', { count: 'exact', head: true }),
-  ]);
+  const errors: string[] = [];
 
-  const totalUsers = usersResult.count || 0;
-  const pendingSignups = pendingSignupsResult.count || 0;
-  const activeStaff = activeStaffResult.count || 0;
-  const activeAffiliates = activeAffiliatesResult.count || 0;
-  const unusedEmployeeIds = unusedEmployeeIdsResult.count || 0;
-  const recentSignups = recentSignupsResult.count || 0;
-  const totalProjects = projectsResult.count || 0;
-  const activeProjects = activeProjectsResult.count || 0;
-  const totalRevenue = transactionsResult.data?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-  const totalSales = transactionsResult.data?.length || 0;
-  const vouchersAvailable = vouchersAvailableResult.count || 0;
-  const vouchersSold = vouchersSoldResult.count || 0;
-  const totalCustomers = customersResult.count || 0;
+  // Fetch all dashboard statistics in parallel - with error resilience
+  let totalUsers = 0, pendingSignups = 0, activeStaff = 0, activeAffiliates = 0;
+  let unusedEmployeeIds = 0, recentSignups = 0, totalProjects = 0, activeProjects = 0;
+  let totalRevenue = 0, totalSales = 0, vouchersAvailable = 0, vouchersSold = 0, totalCustomers = 0;
+
+  try {
+    const [
+      usersResult,
+      pendingSignupsResult,
+      activeStaffResult,
+      activeAffiliatesResult,
+      unusedEmployeeIdsResult,
+      recentSignupsResult,
+      projectsResult,
+      activeProjectsResult,
+      transactionsResult,
+      vouchersAvailableResult,
+      vouchersSoldResult,
+      customersResult,
+    ] = await Promise.all([
+      supabaseAdmin.from('users').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('signup_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabaseAdmin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'staff').eq('status', 'active'),
+      supabaseAdmin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'affiliate').eq('status', 'active'),
+      supabaseAdmin.from('employee_ids').select('*', { count: 'exact', head: true }).eq('status', 'unused'),
+      supabaseAdmin
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+      supabaseAdmin.from('projects').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      supabaseAdmin.from('sales_transactions').select('amount').eq('payment_status', 'succeeded'),
+      supabaseAdmin.from('voucher_codes').select('*', { count: 'exact', head: true }).eq('status', 'available'),
+      supabaseAdmin.from('voucher_codes').select('*', { count: 'exact', head: true }).eq('status', 'sold'),
+      supabaseAdmin.from('customers').select('*', { count: 'exact', head: true }),
+    ]);
+
+    if (usersResult.error) errors.push(`Users: ${usersResult.error.message}`);
+    if (pendingSignupsResult.error) errors.push(`Signups: ${pendingSignupsResult.error.message}`);
+    if (projectsResult.error) errors.push(`Projects: ${projectsResult.error.message}`);
+    if (transactionsResult.error) errors.push(`Transactions: ${transactionsResult.error.message}`);
+    if (vouchersAvailableResult.error) errors.push(`Vouchers: ${vouchersAvailableResult.error.message}`);
+    if (customersResult.error) errors.push(`Customers: ${customersResult.error.message}`);
+
+    totalUsers = usersResult.count || 0;
+    pendingSignups = pendingSignupsResult.count || 0;
+    activeStaff = activeStaffResult.count || 0;
+    activeAffiliates = activeAffiliatesResult.count || 0;
+    unusedEmployeeIds = unusedEmployeeIdsResult.count || 0;
+    recentSignups = recentSignupsResult.count || 0;
+    totalProjects = projectsResult.count || 0;
+    activeProjects = activeProjectsResult.count || 0;
+    totalRevenue = transactionsResult.data?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+    totalSales = transactionsResult.data?.length || 0;
+    vouchersAvailable = vouchersAvailableResult.count || 0;
+    vouchersSold = vouchersSoldResult.count || 0;
+    totalCustomers = customersResult.count || 0;
+  } catch (error: any) {
+    errors.push(`Dashboard data failed: ${error.message}`);
+    console.error('[SASA Admin] Dashboard error:', error);
+  }
 
   return (
     <div>
@@ -62,6 +81,12 @@ export default async function AdminDashboardPage() {
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
         <p className="text-gray-600 mt-2">Overview of your SASA Worldwide system</p>
       </div>
+
+      {errors.length > 0 && (
+        <div className="mb-6">
+          <ServerError title={`${errors.length} data loading error(s)`} message={errors.join(' | ')} />
+        </div>
+      )}
 
       {/* Sales & Revenue Section */}
       <div className="mb-8">

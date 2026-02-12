@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { ArrowLeft, Trophy, TrendingUp, DollarSign } from 'lucide-react';
+import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function SalesLeaderboardPage() {
   const session = await auth();
@@ -34,16 +35,19 @@ export default async function SalesLeaderboardPage() {
   }
 
   // Fetch all successful transactions grouped by salesperson
-  const { data: transactions } = await supabaseAdmin
+  const errors: string[] = [];
+  const { data: transactions, error: txError } = await supabaseAdmin
     .from('sales_transactions')
     .select('salesperson_id, amount, commission_amount, created_at')
     .eq('payment_status', 'succeeded');
+  if (txError) errors.push(`Transactions: ${txError.message}`);
 
   // Get all salespeople
-  const { data: salesStaff } = await supabaseAdmin
+  const { data: salesStaff, error: staffError } = await supabaseAdmin
     .from('staff_profiles')
     .select('user_id, users!staff_profiles_user_id_fkey(id, name, email)')
     .eq('department', 'sales');
+  if (staffError) errors.push(`Sales staff: ${staffError.message}`);
 
   // Build leaderboard data
   const leaderboardMap = new Map<string, {
@@ -114,6 +118,12 @@ export default async function SalesLeaderboardPage() {
           </h1>
           <p className="text-gray-600 mt-1">See how the team is performing</p>
         </div>
+
+        {errors.length > 0 && (
+          <div className="mb-6">
+            <ServerError title="Data loading error" message={errors.join(' | ')} />
+          </div>
+        )}
 
         {/* Top 3 Podium */}
         {leaderboard.length >= 1 && (

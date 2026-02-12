@@ -34,15 +34,25 @@ export function EmployeeIdManager() {
     fetchEmployeeIds();
   }, []);
 
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const fetchEmployeeIds = async () => {
     try {
+      setFetchError(null);
       const response = await fetch('/api/admin/employee-ids');
       const data = await response.json();
+      if (!response.ok) {
+        setFetchError(data.error || `API returned ${response.status}`);
+        return;
+      }
       if (data.employeeIds) {
         setEmployeeIds(data.employeeIds);
+      } else {
+        setFetchError('No employee IDs data in response');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch employee IDs:', error);
+      setFetchError(error.message || 'Network error');
     } finally {
       setLoading(false);
     }
@@ -133,6 +143,14 @@ export function EmployeeIdManager() {
 
   return (
     <div>
+      {fetchError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800 font-medium">Failed to load employee IDs</p>
+          <p className="text-xs text-red-600 mt-1 font-mono">{fetchError}</p>
+          <button onClick={() => { setLoading(true); fetchEmployeeIds(); }} className="mt-2 text-xs text-red-700 underline hover:text-red-900">Retry</button>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">

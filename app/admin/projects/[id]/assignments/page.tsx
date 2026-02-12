@@ -10,6 +10,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { ArrowLeft, QrCode, Download, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { AssignSalespersonForm } from '@/components/projects/AssignSalespersonForm';
+import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function ProjectAssignmentsPage({
   params,
@@ -27,6 +28,7 @@ export default async function ProjectAssignmentsPage({
   }
 
   // Fetch project and assignments
+  const errors: string[] = [];
   const [projectResult, assignmentsResult, salesStaff] = await Promise.all([
     getProjectById(params.id),
     getProjectAssignments(params.id),
@@ -36,6 +38,10 @@ export default async function ProjectAssignmentsPage({
       .select('user_id, users(id, name, email)')
       .eq('department', 'sales'),
   ]);
+
+  if (projectResult.error) errors.push(`Project: ${projectResult.error.message}`);
+  if (assignmentsResult.error) errors.push(`Assignments: ${assignmentsResult.error.message}`);
+  if (salesStaff.error) errors.push(`Sales staff: ${salesStaff.error.message}`);
 
   const project = projectResult.data;
   const assignments = assignmentsResult.data || [];
@@ -72,6 +78,12 @@ export default async function ProjectAssignmentsPage({
             )}
           </div>
         </div>
+
+        {errors.length > 0 && (
+          <div className="mb-6">
+            <ServerError title="Data loading error" message={errors.join(' | ')} />
+          </div>
+        )}
 
         {/* Assign New Salesperson */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">

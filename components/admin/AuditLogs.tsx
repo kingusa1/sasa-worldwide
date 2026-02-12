@@ -18,6 +18,7 @@ interface AuditLog {
 export function AuditLogs() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'signup' | 'login' | 'approval' | 'employee_id'>('all');
   const [limit, setLimit] = useState(50);
 
@@ -27,13 +28,21 @@ export function AuditLogs() {
 
   const fetchLogs = async () => {
     try {
+      setFetchError(null);
       const response = await fetch(`/api/admin/audit-logs?limit=${limit}`);
       const data = await response.json();
+      if (!response.ok) {
+        setFetchError(data.error || `API returned ${response.status}`);
+        return;
+      }
       if (data.logs) {
         setLogs(data.logs);
+      } else {
+        setFetchError('No logs data in response');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch logs:', error);
+      setFetchError(error.message || 'Network error');
     } finally {
       setLoading(false);
     }
@@ -113,6 +122,14 @@ export function AuditLogs() {
           </select>
         </div>
       </div>
+
+      {fetchError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800 font-medium">Failed to load audit logs</p>
+          <p className="text-xs text-red-600 mt-1 font-mono">{fetchError}</p>
+          <button onClick={() => { setLoading(true); fetchLogs(); }} className="mt-2 text-xs text-red-700 underline hover:text-red-900">Retry</button>
+        </div>
+      )}
 
       {/* Logs */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">

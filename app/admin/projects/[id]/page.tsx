@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { getProjectById, getVoucherInventory, getProjectAssignments } from '@/lib/supabase/projects';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function ProjectDetailPage({
   params,
@@ -21,6 +22,7 @@ export default async function ProjectDetailPage({
   }
 
   // Fetch project data in parallel
+  const errors: string[] = [];
   const [projectResult, inventoryResult, assignmentsResult, transactionsResult] = await Promise.all([
     getProjectById(params.id),
     getVoucherInventory(params.id),
@@ -32,6 +34,11 @@ export default async function ProjectDetailPage({
       .eq('payment_status', 'succeeded')
       .order('created_at', { ascending: false }),
   ]);
+
+  if (projectResult.error) errors.push(`Project: ${projectResult.error.message}`);
+  if (inventoryResult.error) errors.push(`Inventory: ${inventoryResult.error.message}`);
+  if (assignmentsResult.error) errors.push(`Assignments: ${assignmentsResult.error.message}`);
+  if (transactionsResult.error) errors.push(`Transactions: ${transactionsResult.error.message}`);
 
   const project = projectResult.data;
 
@@ -54,6 +61,12 @@ export default async function ProjectDetailPage({
 
   return (
     <div>
+      {errors.length > 0 && (
+        <div className="mb-6">
+          <ServerError title={`${errors.length} data loading error(s)`} message={errors.join(' | ')} />
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <Link
