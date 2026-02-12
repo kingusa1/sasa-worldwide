@@ -21,31 +21,50 @@ export async function GET(
   try {
     const { id } = params;
 
-    // Fetch user with profile joins
+    // Fetch user with profile joins - try full query first, fallback to basic
+    let normalized: any = null;
+
     const { data: user, error } = await supabaseAdmin
       .from('users')
       .select(`
         *,
-        staff_profiles(id, employee_id, department, phone, hire_date, manager_id),
+        staff_profiles(id, employee_id, department, phone),
         affiliate_profiles(id, referral_code, phone)
       `)
       .eq('id', id)
       .single();
 
-    if (error || !user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+    if (error) {
+      console.error('[User Detail] Join query failed, trying basic:', error.message);
+      // Fallback: fetch user without joins
+      const { data: basicUser, error: basicError } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    // Normalize profiles to arrays
-    const normalized = {
-      ...user,
-      staff_profiles: user.staff_profiles
-        ? Array.isArray(user.staff_profiles) ? user.staff_profiles : [user.staff_profiles]
-        : [],
-      affiliate_profiles: user.affiliate_profiles
-        ? Array.isArray(user.affiliate_profiles) ? user.affiliate_profiles : [user.affiliate_profiles]
-        : [],
-    };
+      if (basicError || !basicUser) {
+        return NextResponse.json(
+          { error: `User not found: ${(basicError || error).message}` },
+          { status: 404 }
+        );
+      }
+
+      normalized = { ...basicUser, staff_profiles: [], affiliate_profiles: [] };
+    } else if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    } else {
+      // Normalize profiles to arrays (Supabase returns objects for 1-to-1 joins)
+      normalized = {
+        ...user,
+        staff_profiles: user.staff_profiles
+          ? Array.isArray(user.staff_profiles) ? user.staff_profiles : [user.staff_profiles]
+          : [],
+        affiliate_profiles: user.affiliate_profiles
+          ? Array.isArray(user.affiliate_profiles) ? user.affiliate_profiles : [user.affiliate_profiles]
+          : [],
+      };
+    }
 
     // Fetch related data: audit logs and sales transactions
     const [auditResult, salesResult] = await Promise.all([

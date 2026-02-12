@@ -375,54 +375,45 @@ export function UserManagement() {
                         </button>
                       )}
                     </td>
-                    {/* Department - dedicated column */}
+                    {/* Department - editable for all users */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {user.role === 'staff' && user.staff_profiles?.[0] ? (
-                        editingDepartment === user.id ? (
-                          <div className="flex items-center gap-1">
-                            <select
-                              defaultValue={staffDept || ''}
-                              onChange={(e) => handleChangeDepartment(user.id, e.target.value)}
-                              className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-navy"
-                              autoFocus
-                            >
-                              {DEPARTMENTS.map((dept) => (
-                                <option key={dept.value} value={dept.value}>
-                                  {dept.label}
-                                </option>
-                              ))}
-                            </select>
-                            <button
-                              onClick={() => setEditingDepartment(null)}
-                              className="text-gray-400 hover:text-gray-600 text-xs"
-                            >
-                              &#10005;
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setEditingDepartment(user.id)}
-                            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-indigo-50 text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-colors"
-                            title="Click to change department"
+                      {editingDepartment === user.id ? (
+                        <div className="flex items-center gap-1">
+                          <select
+                            defaultValue={staffDept || ''}
+                            onChange={(e) => handleChangeDepartment(user.id, e.target.value)}
+                            className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-navy"
+                            autoFocus
                           >
-                            {deptLabel || 'Not set'}
-                            <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
+                            <option value="">Select...</option>
+                            {DEPARTMENTS.map((dept) => (
+                              <option key={dept.value} value={dept.value}>
+                                {dept.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => setEditingDepartment(null)}
+                            className="text-gray-400 hover:text-gray-600 text-xs"
+                          >
+                            &#10005;
                           </button>
-                        )
-                      ) : user.role === 'staff' && !user.staff_profiles?.[0] ? (
-                        <span className="text-xs text-orange-500 italic">No profile</span>
-                      ) : user.role === 'affiliate' ? (
-                        <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700">
-                          External
-                        </span>
-                      ) : user.role === 'admin' ? (
-                        <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-purple-50 text-purple-700">
-                          Administration
-                        </span>
+                        </div>
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <button
+                          onClick={() => setEditingDepartment(user.id)}
+                          className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 transition-colors ${
+                            deptLabel
+                              ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                              : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                          }`}
+                          title="Click to change department"
+                        >
+                          {deptLabel || 'Set dept'}
+                          <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
