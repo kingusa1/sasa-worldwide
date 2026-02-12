@@ -12,6 +12,8 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Try query with profile joins first
+    let users: any[] = [];
     const { data, error } = await supabaseAdmin
       .from('users')
       .select(`
@@ -21,30 +23,45 @@ export async function GET(request: Request) {
       `)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[SASA Users] Join query failed, trying basic:', error.message);
+      // Fallback: fetch users without profile joins
+      const { data: basicData, error: basicError } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    // Normalize: Supabase returns one-to-one joins as single objects (because
-    // user_id is UNIQUE in both profile tables). The frontend expects arrays,
-    // so wrap single objects in arrays for consistent access via [0].
-    const normalized = (data || []).map((user: any) => ({
-      ...user,
-      staff_profiles: user.staff_profiles
-        ? Array.isArray(user.staff_profiles)
-          ? user.staff_profiles
-          : [user.staff_profiles]
-        : [],
-      affiliate_profiles: user.affiliate_profiles
-        ? Array.isArray(user.affiliate_profiles)
-          ? user.affiliate_profiles
-          : [user.affiliate_profiles]
-        : [],
-    }));
+      if (basicError) throw basicError;
+      users = (basicData || []).map((user: any) => ({
+        ...user,
+        staff_profiles: [],
+        affiliate_profiles: [],
+      }));
+    } else {
+      // Normalize: Supabase returns one-to-one joins as single objects (because
+      // user_id is UNIQUE in both profile tables). The frontend expects arrays,
+      // so wrap single objects in arrays for consistent access via [0].
+      users = (data || []).map((user: any) => ({
+        ...user,
+        staff_profiles: user.staff_profiles
+          ? Array.isArray(user.staff_profiles)
+            ? user.staff_profiles
+            : [user.staff_profiles]
+          : [],
+        affiliate_profiles: user.affiliate_profiles
+          ? Array.isArray(user.affiliate_profiles)
+            ? user.affiliate_profiles
+            : [user.affiliate_profiles]
+          : [],
+      }));
+    }
 
-    return NextResponse.json({ users: normalized });
+    console.log(`[SASA Users] Returning ${users.length} users`);
+    return NextResponse.json({ users });
   } catch (error: any) {
     console.error('Failed to fetch users:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch users' },
+      { error: `Failed to fetch users: ${error.message}` },
       { status: 500 }
     );
   }
