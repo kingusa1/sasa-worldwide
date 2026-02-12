@@ -1,35 +1,67 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import { ReactElement } from 'react';
 
-// Lazy transporter - created on first use, not at module load
+// ============================================
+// Unified Email Sender
+// Primary: Resend (HTTP API - works on Vercel)
+// Fallback: SMTP (works on local dev only)
+// ============================================
+
 let _transporter: nodemailer.Transporter | null = null;
 
-function getTransporter(): nodemailer.Transporter {
+function getSmtpTransporter(): nodemailer.Transporter {
   if (!_transporter) {
-    const host = process.env.SMTP_HOST;
-    const port = parseInt(process.env.SMTP_PORT || '465');
-    const secure = port === 465 ? true : process.env.SMTP_SECURE === 'true';
-
-    console.log(`[SMTP] Creating transporter: ${host}:${port} (secure=${secure})`);
-
     _transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '465'),
+      secure: parseInt(process.env.SMTP_PORT || '465') === 465,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
       },
-      tls: {
-        rejectUnauthorized: false,
-      },
-      connectionTimeout: 10000, // 10s to connect
-      socketTimeout: 15000,     // 15s socket timeout
-      greetingTimeout: 10000,   // 10s greeting timeout
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 10000,
+      socketTimeout: 15000,
+      greetingTimeout: 10000,
     });
   }
   return _transporter;
+}
+
+async function sendViaResend(to: string, subject: string, html: string): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error('RESEND_API_KEY not configured');
+
+  const resend = new Resend(apiKey);
+  const fromEmail = process.env.SMTP_FROM || 'SASA Worldwide <onboarding@resend.dev>';
+
+  console.log(`[Email/Resend] Sending to=${to}, subject="${subject}"`);
+
+  const { data, error } = await resend.emails.send({
+    from: fromEmail,
+    to,
+    subject,
+    html,
+  });
+
+  if (error) {
+    console.error('[Email/Resend] API error:', JSON.stringify(error));
+    throw new Error(`Resend API error: ${JSON.stringify(error)}`);
+  }
+
+  console.log(`[Email/Resend] Sent successfully: id=${data?.id}`);
+}
+
+async function sendViaSMTP(to: string, subject: string, html: string): Promise<void> {
+  const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || '';
+  console.log(`[Email/SMTP] Sending to=${to}, subject="${subject}"`);
+
+  const transporter = getSmtpTransporter();
+  const info = await transporter.sendMail({ from: fromEmail, to, subject, html });
+
+  console.log(`[Email/SMTP] Sent successfully: messageId=${info.messageId}`);
 }
 
 export async function sendEmailSMTP({
@@ -45,67 +77,40 @@ export async function sendEmailSMTP({
   html?: string;
   from?: string;
 }) {
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASSWORD;
-  const smtpHost = process.env.SMTP_HOST;
-
-  if (!smtpUser || !smtpPass || !smtpHost) {
-    console.error('[SMTP] Missing config:', {
-      host: !!smtpHost,
-      user: !!smtpUser,
-      pass: !!smtpPass,
-    });
-    throw new Error('SMTP not configured: missing SMTP_HOST, SMTP_USER, or SMTP_PASSWORD');
-  }
-
-  // Render React email template to HTML, or use raw HTML
+  // Build HTML from template or use raw HTML
   let html: string;
   if (rawHtml) {
     html = rawHtml;
   } else if (template) {
-    try {
-      html = await render(template);
-    } catch (renderError) {
-      console.error('[SMTP] React email render failed:', renderError);
-      throw new Error(`Email template render failed: ${renderError}`);
-    }
+    html = await render(template);
   } else {
     throw new Error('Either template or html must be provided');
   }
 
-  const fromEmail = from || process.env.SMTP_FROM || smtpUser;
   const toAddress = Array.isArray(to) ? to.join(', ') : to;
 
-  // Retry up to 2 times
-  let lastError: Error | null = null;
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  // Strategy: Try Resend first (works on Vercel), fall back to SMTP (works locally)
+  if (process.env.RESEND_API_KEY) {
     try {
-      console.log(`[SMTP] Sending email (attempt ${attempt}): to=${toAddress}, subject="${subject}"`);
-
-      const transporter = getTransporter();
-      const info = await transporter.sendMail({
-        from: fromEmail,
-        to: toAddress,
-        subject,
-        html,
-      });
-
-      console.log(`[SMTP] Email sent successfully: messageId=${info.messageId}`);
-      return info;
-    } catch (error: any) {
-      lastError = error;
-      console.error(`[SMTP] Attempt ${attempt} failed:`, error.message || error);
-
-      // Reset transporter on failure so next attempt creates a fresh connection
-      _transporter = null;
-
-      if (attempt < 2) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1s delay before retry
-      }
+      await sendViaResend(toAddress, subject, html);
+      return;
+    } catch (resendError: any) {
+      console.error('[Email] Resend failed:', resendError.message);
     }
   }
 
-  throw lastError || new Error('Email sending failed after retries');
+  // Fallback: Try SMTP (works on local dev, blocked on Vercel)
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+    try {
+      await sendViaSMTP(toAddress, subject, html);
+      return;
+    } catch (smtpError: any) {
+      console.error('[Email] SMTP failed:', smtpError.message);
+      _transporter = null;
+    }
+  }
+
+  throw new Error('All email methods failed. Check RESEND_API_KEY and SMTP config.');
 }
 
-export { getTransporter as transporter };
+export { getSmtpTransporter as transporter };
