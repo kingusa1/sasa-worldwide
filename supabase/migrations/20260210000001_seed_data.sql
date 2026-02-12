@@ -11,7 +11,7 @@
 INSERT INTO users (email, password_hash, name, role, status, email_verified)
 VALUES (
   'admin@sasa-worldwide.com',
-  '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5wZBhQrOjd.JO', -- bcrypt hash of 'Admin@123'
+  '$2b$12$QyWRnSx2F8197Jukx0htKuQb8MIXDVRDimyHasaoBNoh9tSXEvHpm', -- bcrypt hash of 'Admin@123'
   'System Administrator',
   'admin',
   'active',
@@ -38,7 +38,7 @@ WHERE email = 'admin@sasa-worldwide.com';
 INSERT INTO users (email, password_hash, name, role, status, email_verified)
 VALUES (
   'john.doe@sasa-worldwide.com',
-  '$2b$12$WvPqPFgqMpLRJXbBqGTX5.5y0nN0kTNdN7GjBqQJZKZPxJ8JZyJxW', -- bcrypt hash of 'Staff@123'
+  '$2b$12$n5V0Vi7NxuHZXd3zgWGPduZtikCMbmCK3Y6fei.Yeno3rf4Uermey', -- bcrypt hash of 'Staff@123'
   'John Doe',
   'staff',
   'active',
@@ -68,7 +68,7 @@ ON CONFLICT (employee_id) DO NOTHING;
 INSERT INTO users (email, password_hash, name, role, status, email_verified)
 VALUES (
   'jane.smith@example.com',
-  '$2b$12$XYZ9qPFgqMpLRJXbBqGTX5.5y0nN0kTNdN7GjBqQJZKZPxJ8ABC',  -- bcrypt hash of 'Affiliate@123'
+  '$2b$12$PLEujLx9Q86HL.y3Cqgxg.KE8vwyijymRq1Bj8ON9r7yt6bRhWzji',  -- bcrypt hash of 'Affiliate@123'
   'Jane Smith',
   'affiliate',
   'active',

@@ -1,13 +1,15 @@
-import { auth } from '@/auth';
+import NextAuth from 'next-auth';
+import { authConfig } from './auth.config';
 import { NextResponse } from 'next/server';
 
-export default auth((req) => {
+// Use Edge-compatible auth config (no bcryptjs dependency)
+export default NextAuth(authConfig).auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
   const userRole = req.auth?.user?.role;
 
   // Protected routes - require authentication
-  const protectedRoutes = ['/admin', '/staff', '/dashboard', '/profile'];
+  const protectedRoutes = ['/admin', '/staff', '/sales', '/crm', '/affiliate', '/dashboard', '/profile'];
 
   // Check if current path is protected
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
@@ -31,6 +33,21 @@ export default auth((req) => {
 
   // Staff portal routes (staff and admin only)
   if (pathname.startsWith('/staff') && userRole !== 'staff' && userRole !== 'admin') {
+    return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
+  }
+
+  // Sales routes (sales staff and admin)
+  if (pathname.startsWith('/sales') && userRole !== 'staff' && userRole !== 'admin') {
+    return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
+  }
+
+  // CRM routes (staff, affiliate, and admin)
+  if (pathname.startsWith('/crm') && userRole !== 'staff' && userRole !== 'admin' && userRole !== 'affiliate') {
+    return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
+  }
+
+  // Affiliate routes (affiliate and admin)
+  if (pathname.startsWith('/affiliate') && userRole !== 'affiliate' && userRole !== 'admin') {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 

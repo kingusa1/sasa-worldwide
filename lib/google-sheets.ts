@@ -48,8 +48,20 @@ function getGoogleSheets() {
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
 const SHEET_NAME = 'posts';
 
-// Get all blog posts from Google Sheets
+// In-memory cache to prevent hitting Google Sheets API quota during builds
+// During static generation, getAllPosts() is called once per blog post page
+// (generateStaticParams + generateMetadata + render = 40+ calls for 19 posts)
+// This cache ensures we only make 1 API call per 60-second window
+let postsCache: { data: BlogPost[]; timestamp: number } | null = null;
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+// Get all blog posts from Google Sheets (with caching)
 export async function getAllPosts(): Promise<BlogPost[]> {
+  // Return cached data if fresh
+  if (postsCache && Date.now() - postsCache.timestamp < CACHE_TTL_MS) {
+    return postsCache.data;
+  }
+
   try {
     const sheets = getGoogleSheets();
 
@@ -61,6 +73,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
     const rows = response.data.values;
 
     if (!rows || rows.length === 0) {
+      postsCache = { data: [], timestamp: Date.now() };
       return [];
     }
 
@@ -85,7 +98,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       .filter((post) => post.status === 'published' && post.slug && post.title);
 
     // Sort by date (newest first) so latest article appears as featured
-    return posts.sort((a, b) => {
+    const sorted = posts.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       // Handle invalid dates by putting them at the end
@@ -94,8 +107,17 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       if (isNaN(dateB)) return -1;
       return dateB - dateA; // Newest first
     });
+
+    // Cache the result
+    postsCache = { data: sorted, timestamp: Date.now() };
+    return sorted;
   } catch (error) {
     console.error('Error fetching posts from Google Sheets:', error);
+    // If we have stale cache, return it instead of empty
+    if (postsCache) {
+      console.log('Returning stale cached posts due to API error');
+      return postsCache.data;
+    }
     return [];
   }
 }

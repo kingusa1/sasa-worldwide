@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import bcrypt from 'bcryptjs';
 import { JWT } from 'next-auth/jwt';
+import { authConfig } from './auth.config';
 
 // Extend the built-in session types
 declare module 'next-auth' {
@@ -37,6 +38,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       name: 'credentials',
@@ -105,35 +107,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }): Promise<JWT> {
-      // Add user data to token on sign in
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.status = user.status;
-        token.emailVerified = !!user.emailVerified;
-      }
-      return token;
-    },
-    async session({ session, token }): Promise<Session> {
-      // Add token data to session
-      if (token && session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role as 'staff' | 'affiliate' | 'admin';
-        session.user.status = token.status as 'pending' | 'active' | 'suspended' | 'rejected';
-        session.user.emailVerified = token.emailVerified as any;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: '/login',
-    error: '/login',
-  },
-  session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
   secret: process.env.NEXTAUTH_SECRET,
 });

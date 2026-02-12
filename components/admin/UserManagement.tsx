@@ -21,12 +21,28 @@ interface User {
   }>;
 }
 
+const DEPARTMENTS = [
+  { value: 'sales', label: 'Sales' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'field-operations', label: 'Field Operations' },
+  { value: 'customer-service', label: 'Customer Service' },
+  { value: 'business-development', label: 'Business Development' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'human-resources', label: 'Human Resources' },
+  { value: 'it-technology', label: 'IT & Technology' },
+  { value: 'management', label: 'Management' },
+  { value: 'admin', label: 'Administration' },
+];
+
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'staff' | 'affiliate' | 'admin'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'pending' | 'suspended' | 'rejected'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingDepartment, setEditingDepartment] = useState<string | null>(null);
+  const [editingRole, setEditingRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -96,6 +112,49 @@ export function UserManagement() {
 
       await fetchUsers();
       alert('User deleted successfully');
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleChangeDepartment = async (userId: string, department: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/update-department`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ department }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to update department');
+
+      setEditingDepartment(null);
+      await fetchUsers();
+      alert('Department updated successfully');
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleChangeRole = async (userId: string, role: string) => {
+    if (!confirm(`Are you sure you want to change this user's role to "${role}"?`)) {
+      setEditingRole(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/update-role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to update role');
+
+      setEditingRole(null);
+      await fetchUsers();
+      alert('Role updated successfully');
     } catch (error: any) {
       alert(error.message);
     }
@@ -252,17 +311,40 @@ export function UserManagement() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize ${
-                          user.role === 'admin'
-                            ? 'bg-purple-100 text-purple-800'
-                            : user.role === 'staff'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {user.role}
-                      </span>
+                      {editingRole === user.id ? (
+                        <div className="flex items-center gap-1">
+                          <select
+                            defaultValue={user.role}
+                            onChange={(e) => handleChangeRole(user.id, e.target.value)}
+                            className="text-xs border border-gray-300 rounded px-1 py-1 focus:ring-1 focus:ring-navy"
+                            autoFocus
+                          >
+                            <option value="staff">Staff</option>
+                            <option value="affiliate">Affiliate</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                          <button
+                            onClick={() => setEditingRole(null)}
+                            className="text-gray-400 hover:text-gray-600 text-xs"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setEditingRole(user.id)}
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize cursor-pointer hover:opacity-80 ${
+                            user.role === 'admin'
+                              ? 'bg-purple-100 text-purple-800'
+                              : user.role === 'staff'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                          title="Click to change role"
+                        >
+                          {user.role}
+                        </button>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -283,8 +365,40 @@ export function UserManagement() {
                       {user.role === 'staff' && user.staff_profiles?.[0] && (
                         <div>
                           <div>ID: {user.staff_profiles[0].employee_id}</div>
-                          <div className="text-xs text-gray-500">{user.staff_profiles[0].department}</div>
+                          {editingDepartment === user.id ? (
+                            <div className="flex items-center gap-1 mt-1">
+                              <select
+                                defaultValue={user.staff_profiles[0].department}
+                                onChange={(e) => handleChangeDepartment(user.id, e.target.value)}
+                                className="text-xs border border-gray-300 rounded px-1 py-1 focus:ring-1 focus:ring-navy"
+                                autoFocus
+                              >
+                                {DEPARTMENTS.map((dept) => (
+                                  <option key={dept.value} value={dept.value}>
+                                    {dept.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                onClick={() => setEditingDepartment(null)}
+                                className="text-gray-400 hover:text-gray-600 text-xs"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setEditingDepartment(user.id)}
+                              className="text-xs text-gray-500 hover:text-navy cursor-pointer hover:underline mt-1"
+                              title="Click to change department"
+                            >
+                              {DEPARTMENTS.find(d => d.value === user.staff_profiles?.[0]?.department)?.label || user.staff_profiles[0].department}
+                            </button>
+                          )}
                         </div>
+                      )}
+                      {user.role === 'staff' && !user.staff_profiles?.[0] && (
+                        <span className="text-xs text-orange-500">No profile</span>
                       )}
                       {user.role === 'affiliate' && user.affiliate_profiles?.[0] && (
                         <div className="text-xs">

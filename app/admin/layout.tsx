@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { AdminNav } from '@/components/admin/AdminNav';
+import { LogoutButton } from '@/components/auth/LogoutButton';
 
 export default async function AdminLayout({
   children,
@@ -33,14 +34,7 @@ export default async function AdminLayout({
               <span className="text-sm text-gray-600">
                 {session.user.name || session.user.email}
               </span>
-              <form action="/api/auth/signout" method="POST">
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-navy hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Sign Out
-                </button>
-              </form>
+              <LogoutButton className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-navy hover:bg-gray-100 rounded-lg transition-colors" />
             </div>
           </div>
         </div>
