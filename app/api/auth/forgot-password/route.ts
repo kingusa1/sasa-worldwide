@@ -103,11 +103,13 @@ export async function POST(request: Request) {
     }
 
     // Log the request (non-blocking)
-    supabaseAdmin.from('audit_logs').insert({
-      user_id: user.id,
-      action: 'password_reset_requested',
-      details: {},
-    }).then(() => {}).catch(() => {});
+    try {
+      await supabaseAdmin.from('audit_logs').insert({
+        user_id: user.id,
+        action: 'password_reset_requested',
+        details: {},
+      });
+    } catch (_) {}
 
     return NextResponse.json({
       success: true,
