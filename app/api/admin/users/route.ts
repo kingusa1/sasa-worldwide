@@ -16,14 +16,31 @@ export async function GET(request: Request) {
       .from('users')
       .select(`
         *,
-        staff_profiles:staff_profiles!staff_profiles_user_id_fkey(employee_id, department, phone),
-        affiliate_profiles:affiliate_profiles!affiliate_profiles_user_id_fkey(referral_code, phone)
+        staff_profiles(employee_id, department, phone),
+        affiliate_profiles(referral_code, phone)
       `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    return NextResponse.json({ users: data });
+    // Normalize: Supabase returns one-to-one joins as single objects (because
+    // user_id is UNIQUE in both profile tables). The frontend expects arrays,
+    // so wrap single objects in arrays for consistent access via [0].
+    const normalized = (data || []).map((user: any) => ({
+      ...user,
+      staff_profiles: user.staff_profiles
+        ? Array.isArray(user.staff_profiles)
+          ? user.staff_profiles
+          : [user.staff_profiles]
+        : [],
+      affiliate_profiles: user.affiliate_profiles
+        ? Array.isArray(user.affiliate_profiles)
+          ? user.affiliate_profiles
+          : [user.affiliate_profiles]
+        : [],
+    }));
+
+    return NextResponse.json({ users: normalized });
   } catch (error: any) {
     console.error('Failed to fetch users:', error);
     return NextResponse.json(

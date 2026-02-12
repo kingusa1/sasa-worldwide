@@ -193,7 +193,7 @@ export async function POST(request: Request) {
     await supabaseAdmin.from('audit_logs').insert({
       user_id: user.id,
       action: 'signup',
-      details: { role: 'staff', department, employeeId },
+      metadata: { role: 'staff', department, employeeId },
     });
 
     return NextResponse.json({

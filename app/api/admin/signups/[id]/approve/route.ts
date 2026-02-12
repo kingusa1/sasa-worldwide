@@ -64,7 +64,7 @@ export async function POST(
     await supabaseAdmin.from('audit_logs').insert({
       user_id: session.user.id,
       action: 'approve_signup',
-      details: { approved_user_id: signupRequest.user_id, notes: approvalNotes },
+      metadata: { approved_user_id: signupRequest.user_id, notes: approvalNotes },
     });
 
     return NextResponse.json({ success: true });
