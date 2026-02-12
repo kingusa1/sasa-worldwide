@@ -16,8 +16,8 @@ export default async function MyProjectsPage() {
     redirect('/login');
   }
 
-  // Only sales staff can access
-  if (session.user.role !== 'staff' && session.user.role !== 'admin') {
+  // Sales staff, affiliates, and admins can access
+  if (session.user.role !== 'staff' && session.user.role !== 'admin' && session.user.role !== 'affiliate') {
     redirect('/');
   }
 

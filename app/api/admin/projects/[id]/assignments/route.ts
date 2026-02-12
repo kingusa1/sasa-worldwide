@@ -47,9 +47,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     if (projectError || !project) return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     if (salespersonError || !salesperson) return NextResponse.json({ error: 'Salesperson not found' }, { status: 404 });
-    if (salesperson.role !== 'staff') return NextResponse.json({ error: 'Only staff members can be assigned' }, { status: 400 });
-    if (profileError || !profile || profile.department !== 'sales') {
-      return NextResponse.json({ error: 'Only sales department staff can be assigned' }, { status: 400 });
+    // Allow staff (sales department) and affiliates to be assigned
+    const isAffiliate = salesperson.role === 'affiliate';
+    const isSalesStaff = salesperson.role === 'staff' && profile?.department === 'sales';
+    if (!isAffiliate && !isSalesStaff) {
+      return NextResponse.json({ error: 'Only sales staff or affiliates can be assigned' }, { status: 400 });
     }
 
     const { data: existingAssignment } = await supabaseAdmin.from('project_assignments')

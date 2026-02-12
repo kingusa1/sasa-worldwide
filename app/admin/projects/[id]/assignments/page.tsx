@@ -27,21 +27,28 @@ export default async function ProjectAssignmentsPage({
     redirect('/');
   }
 
-  // Fetch project and assignments
+  // Fetch project, assignments, sales staff, and affiliates
   const errors: string[] = [];
-  const [projectResult, assignmentsResult, salesStaff] = await Promise.all([
+  const [projectResult, assignmentsResult, salesStaff, affiliates] = await Promise.all([
     getProjectById(params.id),
     getProjectAssignments(params.id),
     // Get sales department staff for assignment
     supabaseAdmin
       .from('staff_profiles')
-      .select('user_id, users(id, name, email)')
+      .select('user_id, users!staff_profiles_user_id_fkey(id, name, email)')
       .eq('department', 'sales'),
+    // Get all affiliates (they are also considered sales)
+    supabaseAdmin
+      .from('users')
+      .select('id, name, email')
+      .eq('role', 'affiliate')
+      .eq('status', 'active'),
   ]);
 
   if (projectResult.error) errors.push(`Project: ${projectResult.error.message}`);
   if (assignmentsResult.error) errors.push(`Assignments: ${assignmentsResult.error.message}`);
   if (salesStaff.error) errors.push(`Sales staff: ${salesStaff.error.message}`);
+  if (affiliates.error) errors.push(`Affiliates: ${affiliates.error.message}`);
 
   const project = projectResult.data;
   const assignments = assignmentsResult.data || [];
@@ -93,7 +100,10 @@ export default async function ProjectAssignmentsPage({
           </div>
           <AssignSalespersonForm
             projectId={params.id}
-            salesStaff={salesStaff.data?.map((s: any) => s.users) || []}
+            salesStaff={[
+              ...(salesStaff.data?.map((s: any) => s.users) || []),
+              ...(affiliates.data || []),
+            ].filter(Boolean)}
             existingAssignments={assignments.map((a: any) => ({ salesperson_id: a.salesperson_id }))}
           />
         </div>

@@ -17,8 +17,8 @@ export default async function SalesLeaderboardPage() {
     redirect('/login');
   }
 
-  // Only sales staff and admins can access
-  if (session.user.role !== 'staff' && session.user.role !== 'admin') {
+  // Sales staff, affiliates, and admins can access
+  if (session.user.role !== 'staff' && session.user.role !== 'admin' && session.user.role !== 'affiliate') {
     redirect('/');
   }
 
@@ -42,12 +42,19 @@ export default async function SalesLeaderboardPage() {
     .eq('payment_status', 'succeeded');
   if (txError) errors.push(`Transactions: ${txError.message}`);
 
-  // Get all salespeople
+  // Get all salespeople (sales department staff + affiliates)
   const { data: salesStaff, error: staffError } = await supabaseAdmin
     .from('staff_profiles')
     .select('user_id, users!staff_profiles_user_id_fkey(id, name, email)')
     .eq('department', 'sales');
   if (staffError) errors.push(`Sales staff: ${staffError.message}`);
+
+  const { data: affiliateUsers, error: affiliateError } = await supabaseAdmin
+    .from('users')
+    .select('id, name, email')
+    .eq('role', 'affiliate')
+    .eq('status', 'active');
+  if (affiliateError) errors.push(`Affiliates: ${affiliateError.message}`);
 
   // Build leaderboard data
   const leaderboardMap = new Map<string, {
@@ -63,10 +70,26 @@ export default async function SalesLeaderboardPage() {
 
   const thisMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-  // Initialize all salespeople
+  // Initialize all salespeople (staff + affiliates)
   salesStaff?.forEach((staff: any) => {
     const user = staff.users;
     if (user) {
+      leaderboardMap.set(user.id, {
+        name: user.name,
+        email: user.email,
+        userId: user.id,
+        totalSales: 0,
+        totalRevenue: 0,
+        totalCommission: 0,
+        monthSales: 0,
+        monthRevenue: 0,
+      });
+    }
+  });
+
+  // Also add affiliates to leaderboard
+  affiliateUsers?.forEach((user: any) => {
+    if (!leaderboardMap.has(user.id)) {
       leaderboardMap.set(user.id, {
         name: user.name,
         email: user.email,

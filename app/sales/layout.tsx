@@ -20,9 +20,11 @@ export default async function SalesLayout({
     redirect('/login');
   }
 
-  // Check if user has sales access
+  // Check if user has sales access (admin, sales staff, or affiliates)
   if (session.user.role === 'admin') {
     // Admins have full access
+  } else if (session.user.role === 'affiliate') {
+    // Affiliates are considered sales - full access
   } else if (session.user.role === 'staff') {
     const { data: profile } = await supabaseAdmin
       .from('staff_profiles')
@@ -71,7 +73,7 @@ export default async function SalesLayout({
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">{session.user.name}</span>
               <Link
-                href={session.user.role === 'admin' ? '/admin' : '/staff/dashboard'}
+                href={session.user.role === 'admin' ? '/admin' : session.user.role === 'affiliate' ? '/affiliate/dashboard' : '/staff/dashboard'}
                 className="text-sm text-navy-600 hover:text-navy-700"
               >
                 {session.user.role === 'admin' ? 'Admin' : 'Home'}
