@@ -28,7 +28,7 @@ export async function GET(
       .from('users')
       .select(`
         *,
-        staff_profiles(id, employee_id, department, phone),
+        staff_profiles!staff_profiles_user_id_fkey(id, employee_id, department, phone),
         affiliate_profiles(id, referral_code, phone)
       `)
       .eq('id', id)

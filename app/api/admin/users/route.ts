@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       .from('users')
       .select(`
         *,
-        staff_profiles(employee_id, department, phone),
+        staff_profiles!staff_profiles_user_id_fkey(employee_id, department, phone),
         affiliate_profiles(referral_code, phone)
       `)
       .order('created_at', { ascending: false });
