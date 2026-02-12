@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 interface User {
   id: string;
@@ -456,6 +457,12 @@ export function UserManagement() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex gap-2">
+                        <Link
+                          href={`/admin/users/${user.id}`}
+                          className="px-3 py-1 bg-navy text-white rounded text-xs font-medium hover:bg-navy/90 transition-colors"
+                        >
+                          Details
+                        </Link>
                         {user.status === 'active' && (
                           <button
                             onClick={() => handleSuspend(user.id)}
