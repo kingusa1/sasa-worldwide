@@ -12,30 +12,48 @@ interface FormField {
   placeholder?: string;
 }
 
-export default function ProjectForm() {
+interface ProjectFormProps {
+  initialData?: {
+    name: string;
+    slug: string;
+    project_type: string;
+    description: string | null;
+    price: number;
+    cost_of_goods: number;
+    commission_rate: number;
+    status: string;
+    form_fields: FormField[];
+  };
+  projectId?: string;
+}
+
+export default function ProjectForm({ initialData, projectId }: ProjectFormProps = {}) {
+  const isEditMode = !!projectId;
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    project_type: 'vouchers',
-    description: '',
-    price: '',
-    cost_of_goods: '',
-    commission_rate: '10',
-    status: 'draft',
+    name: initialData?.name || '',
+    slug: initialData?.slug || '',
+    project_type: initialData?.project_type || 'vouchers',
+    description: initialData?.description || '',
+    price: initialData?.price?.toString() || '',
+    cost_of_goods: initialData?.cost_of_goods?.toString() || '',
+    commission_rate: initialData?.commission_rate?.toString() || '10',
+    status: initialData?.status || 'draft',
   });
-  const [formFields, setFormFields] = useState<FormField[]>([
-    { name: 'name', type: 'text', label: 'Full Name', required: true },
-    { name: 'email', type: 'email', label: 'Email Address', required: true },
-    { name: 'phone', type: 'tel', label: 'Phone Number', required: true },
-  ]);
+  const [formFields, setFormFields] = useState<FormField[]>(
+    initialData?.form_fields || [
+      { name: 'name', type: 'text', label: 'Full Name', required: true },
+      { name: 'email', type: 'email', label: 'Email Address', required: true },
+      { name: 'phone', type: 'tel', label: 'Phone Number', required: true },
+    ]
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    if (name === 'name') {
+    if (name === 'name' && !isEditMode) {
       const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       setFormData({ ...formData, name: value, slug });
     }
@@ -48,8 +66,12 @@ export default function ProjectForm() {
     try {
       if (!formData.name || !formData.slug || !formData.price) throw new Error('Please fill in all required fields');
       if (formFields.length === 0) throw new Error('Please add at least one form field');
-      const response = await fetch('/api/admin/projects', {
-        method: 'POST',
+
+      const url = isEditMode ? `/api/admin/projects/${projectId}` : '/api/admin/projects';
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -60,8 +82,8 @@ export default function ProjectForm() {
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to create project');
-      router.push(`/admin/projects/${data.project.id}`);
+      if (!response.ok) throw new Error(data.error || (isEditMode ? 'Failed to update project' : 'Failed to create project'));
+      router.push(`/admin/projects/${isEditMode ? projectId : data.project.id}`);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
       setIsSubmitting(false);
@@ -79,7 +101,8 @@ export default function ProjectForm() {
           </div>
           <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700">URL Slug *</label>
-            <input type="text" name="slug" required value={formData.slug} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-navy focus:ring-navy" />
+            <input type="text" name="slug" required value={formData.slug} onChange={handleChange} disabled={isEditMode} className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-navy focus:ring-navy ${isEditMode ? 'bg-gray-100 cursor-not-allowed' : ''}`} />
+            {isEditMode && <p className="mt-1 text-xs text-gray-500">Slug cannot be changed (used in QR codes)</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Project Type *</label>
@@ -130,7 +153,7 @@ export default function ProjectForm() {
       {error && <div className="p-4 bg-red-50 border border-red-200 rounded-md"><p className="text-sm text-red-800">{error}</p></div>}
       <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
         <button type="button" onClick={() => router.back()} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-navy hover:bg-blue-900 disabled:opacity-50">{isSubmitting ? 'Creating...' : 'Create Project'}</button>
+        <button type="submit" disabled={isSubmitting} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-navy hover:bg-blue-900 disabled:opacity-50">{isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Project' : 'Create Project')}</button>
       </div>
     </form>
   );

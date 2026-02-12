@@ -99,6 +99,7 @@ export async function createCheckoutSession(
         },
       ],
       metadata,
+      payment_intent_data: { metadata },
       customer_email: customerEmail,
       success_url: successUrl,
       cancel_url: cancelUrl,

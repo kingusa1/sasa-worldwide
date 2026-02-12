@@ -27,9 +27,10 @@ export default async function ProjectDetailPage({
     getProjectAssignments(params.id),
     supabaseAdmin
       .from('sales_transactions')
-      .select('amount, commission_amount, payment_status, created_at')
+      .select('amount, commission_amount, payment_status, fulfillment_status, created_at, customers(name, email), users!sales_transactions_salesperson_id_fkey(name)')
       .eq('project_id', params.id)
-      .eq('payment_status', 'succeeded'),
+      .eq('payment_status', 'succeeded')
+      .order('created_at', { ascending: false }),
   ]);
 
   const project = projectResult.data;
@@ -71,6 +72,15 @@ export default async function ProjectDetailPage({
               <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${statusColors[project.status] || 'bg-gray-100 text-gray-800'}`}>
                 {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
               </span>
+              <Link
+                href={`/admin/projects/${params.id}/edit`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-navy border border-navy rounded-lg hover:bg-navy hover:text-white transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+              </Link>
             </div>
             <p className="text-gray-600 mt-1">{project.description || 'No description'}</p>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
@@ -227,30 +237,53 @@ export default async function ProjectDetailPage({
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Salesperson</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Commission</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fulfillment</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {transactions.slice(0, 10).map((t: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {new Date(t.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                      AED {Number(t.amount).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-orange-600">
-                      AED {Number(t.commission_amount || 0).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-800">
-                        {t.payment_status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {transactions.slice(0, 20).map((t: any, idx: number) => {
+                  const fulfillmentColors: Record<string, string> = {
+                    completed: 'bg-green-100 text-green-800',
+                    email_sent: 'bg-yellow-100 text-yellow-800',
+                    failed: 'bg-red-100 text-red-800',
+                    pending: 'bg-gray-100 text-gray-800',
+                  };
+                  return (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {new Date(t.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <div className="text-gray-900">{t.customers?.name || '-'}</div>
+                        <div className="text-gray-500 text-xs">{t.customers?.email || ''}</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {t.users?.name || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        AED {Number(t.amount).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-orange-600">
+                        AED {Number(t.commission_amount || 0).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-green-100 text-green-800">
+                          {t.payment_status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${fulfillmentColors[t.fulfillment_status] || 'bg-gray-100 text-gray-800'}`}>
+                          {(t.fulfillment_status || 'pending').replace('_', ' ')}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

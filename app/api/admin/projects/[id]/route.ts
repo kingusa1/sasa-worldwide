@@ -9,6 +9,7 @@ import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 import { getProjectById, updateProject, deleteProject } from '@/lib/supabase/projects';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { createOrUpdateStripeProduct } from '@/lib/stripe';
 
 /**
  * GET /api/admin/projects/[id]
@@ -135,6 +136,34 @@ export async function PUT(
     if (commission_rate !== undefined) updateData.commission_rate = Number(commission_rate);
     if (form_fields) updateData.form_fields = form_fields;
     if (status) updateData.status = status;
+
+    // Sync Stripe product/price if price or name changed
+    const { data: currentProject } = await getProjectById(params.id);
+    if (currentProject) {
+      const priceChanged = updateData.price !== undefined && Number(updateData.price) !== Number(currentProject.price);
+      const nameChanged = updateData.name !== undefined && updateData.name !== currentProject.name;
+
+      if (priceChanged || nameChanged) {
+        try {
+          const { productId, priceId } = await createOrUpdateStripeProduct(
+            params.id,
+            updateData.name || currentProject.name,
+            updateData.price !== undefined ? Number(updateData.price) : Number(currentProject.price),
+            currentProject.stripe_product_id || undefined,
+            currentProject.stripe_price_id || undefined
+          );
+          updateData.stripe_product_id = productId;
+          updateData.stripe_price_id = priceId;
+          console.log(`✅ Stripe synced: product=${productId}, price=${priceId}`);
+        } catch (stripeError: any) {
+          console.error('Stripe sync failed:', stripeError);
+          return NextResponse.json(
+            { error: `Stripe update failed: ${stripeError.message}. Database was NOT updated.` },
+            { status: 500 }
+          );
+        }
+      }
+    }
 
     const project = await updateProject(params.id, updateData);
 

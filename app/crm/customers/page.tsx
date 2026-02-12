@@ -28,7 +28,7 @@ export default async function CustomersPage() {
       .from('customers')
       .select(`
         *,
-        sales_transactions(id, amount, created_at, projects(name))
+        sales_transactions(id, amount, created_at, projects(name), users!sales_transactions_salesperson_id_fkey(name))
       `)
       .order('created_at', { ascending: false })
       .limit(100);
@@ -156,6 +156,9 @@ export default async function CustomersPage() {
                       Location
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Referred By
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Purchases
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -191,6 +194,11 @@ export default async function CustomersPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
                             {customer.city || '-'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {customer.sales_transactions?.[0]?.users?.name || '-'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
