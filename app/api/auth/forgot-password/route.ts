@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       expires_at: expiresAt.toISOString(),
     });
 
-    // Send reset email
+    // Send reset email via SMTP
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
     try {
@@ -51,8 +51,9 @@ export async function POST(request: Request) {
           resetUrl,
         }),
       });
+      console.log('[Forgot Password] Reset email sent to:', user.email);
     } catch (emailError) {
-      console.error('Failed to send reset email:', emailError);
+      console.error('[Forgot Password] Failed to send reset email:', emailError);
     }
 
     // Log the request

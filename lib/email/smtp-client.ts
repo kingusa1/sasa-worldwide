@@ -5,17 +5,16 @@ import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 import { ReactElement } from 'react';
 
-// SMTP Configuration
+// SMTP Configuration - Use port 465 with SSL (required for Vercel serverless)
 const SMTP_CONFIG = {
-  host: process.env.SMTP_HOST || 'smtp.gmail.com', // Default to Gmail
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT || '465'),
+  secure: process.env.SMTP_SECURE === 'false' ? false : true, // default true (SSL on 465)
   auth: {
-    user: process.env.SMTP_USER, // Your email address
-    pass: process.env.SMTP_PASSWORD, // Your email password or app password
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
   },
   tls: {
-    // Accept self-signed certificates (common with custom domain hosting)
     rejectUnauthorized: false,
   },
 };
