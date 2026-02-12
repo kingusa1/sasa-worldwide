@@ -51,17 +51,37 @@ const SHEET_NAME = 'posts';
 // In-memory cache to prevent hitting Google Sheets API quota during builds
 // During static generation, getAllPosts() is called once per blog post page
 // (generateStaticParams + generateMetadata + render = 40+ calls for 19 posts)
-// This cache ensures we only make 1 API call per 60-second window
+// This cache ensures we only make 1 API call per 5-minute window
 let postsCache: { data: BlogPost[]; timestamp: number } | null = null;
-const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-// Get all blog posts from Google Sheets (with caching)
+// Promise deduplication: if a fetch is already in-flight, reuse it
+// This prevents concurrent calls during build from each making their own API request
+let pendingFetch: Promise<BlogPost[]> | null = null;
+
+// Get all blog posts from Google Sheets (with caching + deduplication)
 export async function getAllPosts(): Promise<BlogPost[]> {
   // Return cached data if fresh
   if (postsCache && Date.now() - postsCache.timestamp < CACHE_TTL_MS) {
     return postsCache.data;
   }
 
+  // If a fetch is already in-flight, wait for it instead of making another call
+  if (pendingFetch) {
+    return pendingFetch;
+  }
+
+  pendingFetch = fetchPostsFromSheets();
+
+  try {
+    const result = await pendingFetch;
+    return result;
+  } finally {
+    pendingFetch = null;
+  }
+}
+
+async function fetchPostsFromSheets(): Promise<BlogPost[]> {
   try {
     const sheets = getGoogleSheets();
 

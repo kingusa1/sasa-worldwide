@@ -282,7 +282,10 @@ export function UserManagement() {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Department
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -299,24 +302,31 @@ export function UserManagement() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user) => (
+                {filteredUsers.map((user) => {
+                  const staffDept = user.staff_profiles?.[0]?.department;
+                  const deptLabel = staffDept
+                    ? DEPARTMENTS.find(d => d.value === staffDept)?.label || staffDept
+                    : null;
+
+                  return (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-900">{user.name}</span>
                         <span className="text-sm text-gray-500">{user.email}</span>
                         {user.email_verified && (
-                          <span className="text-xs text-green-600 mt-1">✓ Email verified</span>
+                          <span className="text-xs text-green-600 mt-1">&#10003; Email verified</span>
                         )}
                       </div>
                     </td>
+                    {/* Type: Staff / Affiliate / Admin - clickable to change */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       {editingRole === user.id ? (
                         <div className="flex items-center gap-1">
                           <select
                             defaultValue={user.role}
                             onChange={(e) => handleChangeRole(user.id, e.target.value)}
-                            className="text-xs border border-gray-300 rounded px-1 py-1 focus:ring-1 focus:ring-navy"
+                            className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-navy"
                             autoFocus
                           >
                             <option value="staff">Staff</option>
@@ -327,13 +337,13 @@ export function UserManagement() {
                             onClick={() => setEditingRole(null)}
                             className="text-gray-400 hover:text-gray-600 text-xs"
                           >
-                            Cancel
+                            &#10005;
                           </button>
                         </div>
                       ) : (
                         <button
                           onClick={() => setEditingRole(user.id)}
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize cursor-pointer hover:opacity-80 ${
+                          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full capitalize cursor-pointer hover:opacity-80 ${
                             user.role === 'admin'
                               ? 'bg-purple-100 text-purple-800'
                               : user.role === 'staff'
@@ -344,6 +354,56 @@ export function UserManagement() {
                         >
                           {user.role}
                         </button>
+                      )}
+                    </td>
+                    {/* Department - dedicated column */}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {user.role === 'staff' && user.staff_profiles?.[0] ? (
+                        editingDepartment === user.id ? (
+                          <div className="flex items-center gap-1">
+                            <select
+                              defaultValue={staffDept || ''}
+                              onChange={(e) => handleChangeDepartment(user.id, e.target.value)}
+                              className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-navy"
+                              autoFocus
+                            >
+                              {DEPARTMENTS.map((dept) => (
+                                <option key={dept.value} value={dept.value}>
+                                  {dept.label}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => setEditingDepartment(null)}
+                              className="text-gray-400 hover:text-gray-600 text-xs"
+                            >
+                              &#10005;
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setEditingDepartment(user.id)}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-indigo-50 text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-colors"
+                            title="Click to change department"
+                          >
+                            {deptLabel || 'Not set'}
+                            <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                        )
+                      ) : user.role === 'staff' && !user.staff_profiles?.[0] ? (
+                        <span className="text-xs text-orange-500 italic">No profile</span>
+                      ) : user.role === 'affiliate' ? (
+                        <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700">
+                          External
+                        </span>
+                      ) : user.role === 'admin' ? (
+                        <span className="inline-flex px-3 py-1 text-xs font-medium rounded-full bg-purple-50 text-purple-700">
+                          Administration
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -361,49 +421,16 @@ export function UserManagement() {
                         {user.status}
                       </span>
                     </td>
+                    {/* Details: Employee ID / Referral Code */}
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {user.role === 'staff' && user.staff_profiles?.[0] && (
-                        <div>
-                          <div>ID: {user.staff_profiles[0].employee_id}</div>
-                          {editingDepartment === user.id ? (
-                            <div className="flex items-center gap-1 mt-1">
-                              <select
-                                defaultValue={user.staff_profiles[0].department}
-                                onChange={(e) => handleChangeDepartment(user.id, e.target.value)}
-                                className="text-xs border border-gray-300 rounded px-1 py-1 focus:ring-1 focus:ring-navy"
-                                autoFocus
-                              >
-                                {DEPARTMENTS.map((dept) => (
-                                  <option key={dept.value} value={dept.value}>
-                                    {dept.label}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                onClick={() => setEditingDepartment(null)}
-                                className="text-gray-400 hover:text-gray-600 text-xs"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setEditingDepartment(user.id)}
-                              className="text-xs text-gray-500 hover:text-navy cursor-pointer hover:underline mt-1"
-                              title="Click to change department"
-                            >
-                              {DEPARTMENTS.find(d => d.value === user.staff_profiles?.[0]?.department)?.label || user.staff_profiles[0].department}
-                            </button>
-                          )}
-                        </div>
-                      )}
-                      {user.role === 'staff' && !user.staff_profiles?.[0] && (
-                        <span className="text-xs text-orange-500">No profile</span>
+                        <span className="text-xs">ID: {user.staff_profiles[0].employee_id}</span>
                       )}
                       {user.role === 'affiliate' && user.affiliate_profiles?.[0] && (
-                        <div className="text-xs">
-                          Code: {user.affiliate_profiles[0].referral_code}
-                        </div>
+                        <span className="text-xs">Ref: {user.affiliate_profiles[0].referral_code}</span>
+                      )}
+                      {user.role === 'admin' && (
+                        <span className="text-xs text-gray-400">System admin</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -441,7 +468,8 @@ export function UserManagement() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

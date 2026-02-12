@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     await supabaseAdmin.from('audit_logs').insert({
       user_id: user.id,
       action: 'password_changed',
-      details: {},
+      metadata: {},
     });
 
     return NextResponse.json({
