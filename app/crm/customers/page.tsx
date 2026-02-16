@@ -30,7 +30,8 @@ export default async function CustomersPage() {
       .from('customers')
       .select(`
         *,
-        sales_transactions(id, amount, created_at, projects(name), users!sales_transactions_salesperson_id_fkey(name))
+        referrer:users!customers_referred_by_fkey(id, name, email),
+        sales_transactions(id, amount, created_at, salesperson_id, projects(name), users!sales_transactions_salesperson_id_fkey(name))
       `)
       .order('created_at', { ascending: false })
       .limit(100);
@@ -209,7 +210,7 @@ export default async function CustomersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {customer.sales_transactions?.[0]?.users?.name || '-'}
+                            {customer.referrer?.name || customer.sales_transactions?.[0]?.users?.name || '-'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

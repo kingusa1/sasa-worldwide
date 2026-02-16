@@ -47,7 +47,9 @@ export async function POST(req: NextRequest) {
       email: customer_data.email.toLowerCase().trim(), name: customer_data.name.trim(),
       phone: customer_data.phone?.trim() || null, address: customer_data.address?.trim() || null,
       city: customer_data.city?.trim() || null, country: customer_data.country?.trim() || null,
-      additional_info: customer_data, source: 'form_submission', updated_at: new Date().toISOString()
+      additional_info: customer_data, source: 'form_submission',
+      referred_by: salesperson_id,
+      updated_at: new Date().toISOString()
     }, { onConflict: 'email' }).select().single();
 
     if (customerError || !customer) return NextResponse.json({ error: 'Failed to create customer record' }, { status: 500 });

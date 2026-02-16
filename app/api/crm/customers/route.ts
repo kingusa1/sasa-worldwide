@@ -34,7 +34,7 @@ export async function GET(req: Request) {
     // Build query
     let query = supabaseAdmin
       .from('customers')
-      .select('*, sales_transactions(id, project_id, created_at)', { count: 'exact' })
+      .select('*, referrer:users!customers_referred_by_fkey(id, name, email), sales_transactions(id, project_id, created_at, salesperson_id, users!sales_transactions_salesperson_id_fkey(name))', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
