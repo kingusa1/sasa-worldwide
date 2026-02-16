@@ -29,40 +29,23 @@ export default async function FormPage({ params, searchParams }: PageProps) {
   const assignedUser = Array.isArray(assignment.users) ? assignment.users[0] : assignment.users;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          {project.logo_url && <img src={project.logo_url} alt={project.name} className="h-20 mx-auto mb-4" />}
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.name}</h1>
-          {project.description && <p className="text-lg text-gray-600">{project.description}</p>}
-          {(!project.products || project.products.length <= 1) && (
-            <p className="text-2xl font-bold text-navy mt-4">AED {project.price.toFixed(2)}</p>
-          )}
-          {project.products && project.products.length > 1 && (
-            <p className="text-sm text-gray-500 mt-4">Choose your plan below</p>
-          )}
+    <>
+      {searchParams.cancelled && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
+          <p className="text-yellow-800 text-center text-sm">Payment was cancelled. You can try again below.</p>
         </div>
-        {searchParams.cancelled && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 text-center">Payment was cancelled. You can try again below.</p>
-          </div>
-        )}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <DynamicForm
-            projectId={project.id}
-            salespersonId={assignment.salesperson_id}
-            formFields={project.form_fields}
-            projectName={project.name}
-            price={project.price}
-            logoUrl={project.logo_url}
-            products={project.products && project.products.length > 0 ? project.products : undefined}
-          />
-        </div>
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>Powered by SASA Worldwide</p>
-          <p className="mt-2">Questions? Contact your sales representative: {assignedUser.name}</p>
-        </div>
-      </div>
-    </div>
+      )}
+      <DynamicForm
+        projectId={project.id}
+        salespersonId={assignment.salesperson_id}
+        formFields={project.form_fields}
+        projectName={project.name}
+        projectDescription={project.description || undefined}
+        price={project.price}
+        logoUrl={project.logo_url || undefined}
+        products={project.products && project.products.length > 0 ? project.products : undefined}
+        salespersonName={(assignedUser as any).name}
+      />
+    </>
   );
 }

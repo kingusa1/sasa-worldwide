@@ -23,6 +23,10 @@ interface SignupRequest {
       department: string;
       phone: string;
     }>;
+    affiliate_profiles?: Array<{
+      phone: string;
+      referral_code: string;
+    }>;
   };
 }
 
@@ -198,10 +202,10 @@ export default function AdminSignupsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-navy mb-2">
-            Pending Staff Signups
+            Pending Signups
           </h1>
           <p className="text-gray-600">
-            Review and approve staff registration requests
+            Review and approve staff and affiliate registration requests
           </p>
         </div>
 
@@ -222,7 +226,7 @@ export default function AdminSignupsPage() {
               No Pending Signups
             </h3>
             <p className="text-gray-600">
-              All staff registration requests have been processed.
+              All registration requests have been processed.
             </p>
           </div>
         ) : (
@@ -237,10 +241,10 @@ export default function AdminSignupsPage() {
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Department
+                    Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Employee ID
+                    Details
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Requested At
@@ -267,14 +271,26 @@ export default function AdminSignupsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {signup.user.staff_profiles?.[0]?.department || 'N/A'}
-                      </div>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        signup.user.role === 'affiliate'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {signup.user.role === 'affiliate' ? 'Affiliate' : 'Staff'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-mono text-gray-900">
-                        {signup.user.staff_profiles?.[0]?.employee_id || 'N/A'}
-                      </div>
+                      {signup.user.role === 'affiliate' ? (
+                        <div className="text-sm text-gray-900">
+                          {signup.user.affiliate_profiles?.[0]?.referral_code || 'N/A'}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-900">
+                          <span className="font-mono">{signup.user.staff_profiles?.[0]?.employee_id || 'N/A'}</span>
+                          {' - '}
+                          {signup.user.staff_profiles?.[0]?.department || 'N/A'}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
@@ -346,34 +362,68 @@ export default function AdminSignupsPage() {
                 <p className="text-gray-900">{selectedSignup.user.email}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Employee ID
-                  </label>
-                  <p className="text-gray-900 font-mono">
-                    {selectedSignup.user.staff_profiles?.[0]?.employee_id || 'N/A'}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Department
-                  </label>
-                  <p className="text-gray-900">
-                    {selectedSignup.user.staff_profiles?.[0]?.department || 'N/A'}
-                  </p>
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
+                  Role
                 </label>
-                <p className="text-gray-900">
-                  {selectedSignup.user.staff_profiles?.[0]?.phone || 'Not provided'}
-                </p>
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                  selectedSignup.user.role === 'affiliate'
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {selectedSignup.user.role === 'affiliate' ? 'Affiliate' : 'Staff'}
+                </span>
               </div>
+
+              {selectedSignup.user.role === 'affiliate' ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Referral Code
+                    </label>
+                    <p className="text-gray-900 font-mono">
+                      {selectedSignup.user.affiliate_profiles?.[0]?.referral_code || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number
+                    </label>
+                    <p className="text-gray-900">
+                      {selectedSignup.user.affiliate_profiles?.[0]?.phone || 'Not provided'}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Employee ID
+                      </label>
+                      <p className="text-gray-900 font-mono">
+                        {selectedSignup.user.staff_profiles?.[0]?.employee_id || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Department
+                      </label>
+                      <p className="text-gray-900">
+                        {selectedSignup.user.staff_profiles?.[0]?.department || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number
+                    </label>
+                    <p className="text-gray-900">
+                      {selectedSignup.user.staff_profiles?.[0]?.phone || 'Not provided'}
+                    </p>
+                  </div>
+                </>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

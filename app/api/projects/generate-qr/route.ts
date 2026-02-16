@@ -52,8 +52,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // Generate fresh QR code
-    const qrDataURL = await generateQRCodeDataURL(assignment.form_url);
+    // Generate fresh QR code (ensure absolute URL for QR scanning)
+    const qrUrl = assignment.form_url.startsWith('http')
+      ? assignment.form_url
+      : `${process.env.NEXT_PUBLIC_BASE_URL}${assignment.form_url}`;
+    const qrDataURL = await generateQRCodeDataURL(qrUrl);
 
     // Store for future use
     await supabaseAdmin
@@ -105,8 +108,11 @@ export async function GET(req: Request) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Generate QR code as PNG buffer
-    const pngBuffer = await generateQRCodeBuffer(assignment.form_url);
+    // Generate QR code as PNG buffer (ensure absolute URL for QR scanning)
+    const qrUrl = assignment.form_url.startsWith('http')
+      ? assignment.form_url
+      : `${process.env.NEXT_PUBLIC_BASE_URL}${assignment.form_url}`;
+    const pngBuffer = await generateQRCodeBuffer(qrUrl);
     const uint8Array = new Uint8Array(pngBuffer);
 
     return new Response(uint8Array, {

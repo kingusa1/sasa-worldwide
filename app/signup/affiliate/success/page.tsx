@@ -20,69 +20,54 @@ export default function AffiliateSignupSuccessPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-12 px-4 shadow-lg sm:rounded-2xl sm:px-10 text-center">
-          {/* Success Icon */}
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-            <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          {/* Pending Icon */}
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
+            <svg className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
 
           <h2 className="text-2xl font-bold text-navy mb-4">
-            Welcome to SASA Affiliates!
+            Signup Submitted!
           </h2>
 
           <p className="text-gray-600 mb-6 leading-relaxed">
-            Your affiliate account has been created successfully. You can now log in
-            to your dashboard and start earning commissions immediately.
+            Your affiliate application has been submitted successfully. An admin will review
+            your application and you will receive an email once your account is approved.
           </p>
 
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-left">
-            <h3 className="text-sm font-semibold text-navy mb-2">What you can do now:</h3>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left">
+            <h3 className="text-sm font-semibold text-navy mb-2">What happens next:</h3>
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Log in to your affiliate dashboard</span>
+                <span>An admin will review your application</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>You will receive an email when approved</span>
               </li>
               <li className="flex items-start gap-2">
                 <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Get your unique referral link and tracking code</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Start promoting and earning 20% recurring commissions</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Access marketing materials and resources</span>
+                <span>Once approved, log in and start earning commissions</span>
               </li>
             </ul>
           </div>
 
           <p className="text-sm text-gray-500 mb-6">
-            Check your email for your login credentials and important information about your affiliate account.
+            This usually takes less than 24 hours. Check your email for updates.
           </p>
 
           <div className="space-y-3">
             <Link
-              href="/login"
-              className="inline-flex w-full justify-center items-center gap-2 px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-navy hover:bg-navy/90 transition-all"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              Login to Your Dashboard
-            </Link>
-            <Link
               href="/"
-              className="inline-flex w-full justify-center items-center gap-2 px-6 py-3 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-navy/30 transition-all"
+              className="inline-flex w-full justify-center items-center gap-2 px-6 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-navy hover:bg-navy/90 transition-all"
             >
               Return to Home
             </Link>

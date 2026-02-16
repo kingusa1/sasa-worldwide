@@ -99,7 +99,50 @@ export async function createStripeProducts(
 }
 
 /**
- * Create Stripe checkout session
+ * Create Stripe Embedded Checkout session
+ * Returns client_secret for inline payment rendering
+ */
+export async function createEmbeddedCheckoutSession(
+  priceId: string,
+  customerEmail: string,
+  metadata: {
+    transaction_id: string;
+    project_id: string;
+    salesperson_id: string;
+  },
+  returnUrl: string
+): Promise<string> {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      metadata,
+      payment_intent_data: { metadata },
+      customer_email: customerEmail,
+      ui_mode: 'embedded',
+      return_url: returnUrl,
+      expires_at: Math.floor(Date.now() / 1000) + (30 * 60),
+    });
+
+    if (!session.client_secret) {
+      throw new Error('Stripe client secret not generated');
+    }
+
+    return session.client_secret;
+  } catch (error: any) {
+    console.error('Stripe embedded checkout session error:', error);
+    throw new Error(`Failed to create embedded checkout session: ${error.message}`);
+  }
+}
+
+/**
+ * Create Stripe checkout session (hosted redirect)
  */
 export async function createCheckoutSession(
   priceId: string,

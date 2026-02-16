@@ -27,13 +27,14 @@ export async function generateQRCodeForAssignment(
       throw new Error('NEXT_PUBLIC_BASE_URL environment variable is not set');
     }
 
-    // 1. Generate form URL
-    const formUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/form/${projectSlug}/${salespersonSlug}`;
+    // 1. Generate URLs
+    const fullUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/form/${projectSlug}/${salespersonSlug}`;
+    const formUrlPath = `/form/${projectSlug}/${salespersonSlug}`;
 
-    // 2. Generate QR code as data URL
+    // 2. Generate QR code with absolute URL (phones need full URL)
     let qrDataURL: string;
     try {
-      qrDataURL = await QRCode.toDataURL(formUrl, {
+      qrDataURL = await QRCode.toDataURL(fullUrl, {
         width: 1000,
         margin: 2,
         color: {
@@ -49,7 +50,7 @@ export async function generateQRCodeForAssignment(
     return {
       qr_code_url: qrDataURL,
       qr_code_data: qrDataURL,
-      form_url: formUrl,
+      form_url: formUrlPath,
     };
 
   } catch (error: any) {

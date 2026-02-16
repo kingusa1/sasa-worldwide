@@ -6,7 +6,7 @@ export function CopyUrlButton({ formUrl }: { formUrl: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const fullUrl = `${window.location.origin}${formUrl}`;
+    const fullUrl = formUrl.startsWith('http') ? formUrl : `${window.location.origin}${formUrl}`;
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

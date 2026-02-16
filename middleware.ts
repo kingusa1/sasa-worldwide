@@ -9,7 +9,7 @@ export default NextAuth(authConfig).auth((req) => {
   const userRole = req.auth?.user?.role;
 
   // Protected routes - require authentication
-  const protectedRoutes = ['/admin', '/staff', '/sales', '/crm', '/affiliate', '/dashboard', '/profile'];
+  const protectedRoutes = ['/admin', '/staff', '/sales', '/crm', '/affiliate/dashboard', '/dashboard', '/profile'];
 
   // Check if current path is protected
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
@@ -36,8 +36,8 @@ export default NextAuth(authConfig).auth((req) => {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 
-  // Sales routes (sales staff and admin)
-  if (pathname.startsWith('/sales') && userRole !== 'staff' && userRole !== 'admin') {
+  // Sales routes (sales staff, affiliates, and admin)
+  if (pathname.startsWith('/sales') && userRole !== 'staff' && userRole !== 'admin' && userRole !== 'affiliate') {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 
@@ -46,8 +46,8 @@ export default NextAuth(authConfig).auth((req) => {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 
-  // Affiliate routes (affiliate and admin)
-  if (pathname.startsWith('/affiliate') && userRole !== 'affiliate' && userRole !== 'admin') {
+  // Affiliate dashboard routes (affiliate and admin)
+  if (pathname.startsWith('/affiliate/dashboard') && userRole !== 'affiliate' && userRole !== 'admin') {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 

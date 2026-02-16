@@ -30,6 +30,10 @@ export async function GET(request: Request) {
             employee_id,
             department,
             phone
+          ),
+          affiliate_profiles (
+            phone,
+            referral_code
           )
         )
       `)

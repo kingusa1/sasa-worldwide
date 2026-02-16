@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Create user - affiliates get instant approval
+    // Create user - affiliates require admin approval (same as staff)
     const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
@@ -42,8 +42,8 @@ export async function POST(request: Request) {
         password_hash: passwordHash,
         name,
         role: 'affiliate',
-        status: 'active', // Instant approval for affiliates
-        email_verified: true, // Auto-verify for affiliates
+        status: 'pending',
+        email_verified: false,
       })
       .select()
       .single();
@@ -62,21 +62,53 @@ export async function POST(request: Request) {
 
     if (profileError) {
       console.error('Failed to create affiliate profile:', profileError);
-      // Don't fail the signup if profile creation fails
     }
 
-    // Send welcome email
+    // Create signup_requests record for admin approval
+    const { error: signupRequestError } = await supabaseAdmin
+      .from('signup_requests')
+      .insert({
+        user_id: user.id,
+        status: 'pending',
+      });
+
+    if (signupRequestError) {
+      console.error('Failed to create signup request:', signupRequestError);
+    }
+
+    // Send confirmation email to affiliate
     try {
       await sendEmailSMTP({
         to: user.email,
-        subject: 'Welcome to SASA Affiliate Program!',
+        subject: 'SASA Affiliate Signup - Pending Approval',
         template: WelcomeEmail({
           name: user.name,
-          verificationUrl: `${process.env.NEXT_PUBLIC_APP_URL}/affiliate`,
+          verificationUrl: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
         }),
       });
     } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
+      console.error('Failed to send confirmation email:', emailError);
+    }
+
+    // Send admin notification
+    try {
+      await sendEmailSMTP({
+        to: 'it@sasa-worldwide.com',
+        subject: `New Affiliate Signup - ${user.name} (Pending Approval)`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+          <h2 style="color:#002E59;">New Affiliate Signup Request</h2>
+          <p>A new affiliate has signed up and requires your approval:</p>
+          <ul>
+            <li><strong>Name:</strong> ${user.name}</li>
+            <li><strong>Email:</strong> ${user.email}</li>
+            <li><strong>Phone:</strong> ${phone || 'Not provided'}</li>
+            <li><strong>Referral Code:</strong> ${referralCode}</li>
+          </ul>
+          <p><a href="${process.env.NEXT_PUBLIC_BASE_URL}/admin/signups" style="display:inline-block;padding:10px 20px;background-color:#002E59;color:white;text-decoration:none;border-radius:8px;">Review Signup</a></p>
+        </div>`,
+      });
+    } catch (emailError) {
+      console.error('Failed to send admin notification:', emailError);
     }
 
     // Log the signup
@@ -88,7 +120,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Signup successful! You can now log in to your affiliate account.',
+      message: 'Signup submitted! Your account is pending admin approval.',
       userId: user.id,
     });
   } catch (error: any) {

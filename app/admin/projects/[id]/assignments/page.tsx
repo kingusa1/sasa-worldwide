@@ -11,6 +11,7 @@ import { ArrowLeft, QrCode, Download, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { AssignSalespersonForm } from '@/components/projects/AssignSalespersonForm';
 import { CopyUrlButton } from '@/components/projects/CopyUrlButton';
+import { RemoveAssignmentButton } from '@/components/projects/RemoveAssignmentButton';
 import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function ProjectAssignmentsPage({
@@ -52,7 +53,7 @@ export default async function ProjectAssignmentsPage({
   if (affiliates.error) errors.push(`Affiliates: ${affiliates.error.message}`);
 
   const project = projectResult.data;
-  const assignments = assignmentsResult.data || [];
+  const assignments = (assignmentsResult.data || []).filter((a: any) => a.status === 'active');
 
   if (!project) {
     redirect('/admin/projects');
@@ -194,6 +195,11 @@ export default async function ProjectAssignmentsPage({
                     >
                       Preview Form
                     </a>
+                    <RemoveAssignmentButton
+                      projectId={params.id}
+                      assignmentId={assignment.id}
+                      salespersonName={assignment.users?.name || 'Salesperson'}
+                    />
                   </div>
                 </div>
               ))}

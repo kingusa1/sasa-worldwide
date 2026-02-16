@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { createCheckoutSession } from '@/lib/stripe';
+import { createCheckoutSession, createEmbeddedCheckoutSession } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.json();
-    const { project_id, salesperson_id, customer_data, selected_product_index } = formData;
+    const { project_id, salesperson_id, customer_data, selected_product_index, ui_mode } = formData;
 
     if (!project_id || !salesperson_id || !customer_data?.email || !customer_data?.name) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -68,13 +68,26 @@ export async function POST(req: NextRequest) {
 
     if (transactionError || !transaction) return NextResponse.json({ error: 'Failed to create transaction' }, { status: 500 });
 
-    const formUrlPath = assignment.form_url.startsWith('/') ? assignment.form_url : `/${assignment.form_url}`;
+    const txMetadata = { transaction_id: transaction.id, project_id: project_id, salesperson_id: salesperson_id };
+
+    if (ui_mode === 'embedded') {
+      // Embedded checkout - returns client_secret for inline rendering
+      const returnUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/form/success?session_id={CHECKOUT_SESSION_ID}`;
+      const clientSecret = await createEmbeddedCheckoutSession(
+        priceId, customer.email, txMetadata, returnUrl
+      );
+      return NextResponse.json({ client_secret: clientSecret, transaction_id: transaction.id });
+    }
+
+    // Hosted checkout - redirects to Stripe
+    const cancelUrl = assignment.form_url.startsWith('http')
+      ? `${assignment.form_url}?cancelled=true`
+      : `${process.env.NEXT_PUBLIC_BASE_URL}${assignment.form_url}?cancelled=true`;
 
     const checkoutUrl = await createCheckoutSession(
-      priceId, customer.email,
-      { transaction_id: transaction.id, project_id: project_id, salesperson_id: salesperson_id },
+      priceId, customer.email, txMetadata,
       `${process.env.NEXT_PUBLIC_BASE_URL}/form/success?session_id={CHECKOUT_SESSION_ID}`,
-      `${process.env.NEXT_PUBLIC_BASE_URL}${formUrlPath}?cancelled=true`
+      cancelUrl
     );
 
     return NextResponse.json({ checkout_url: checkoutUrl, transaction_id: transaction.id });

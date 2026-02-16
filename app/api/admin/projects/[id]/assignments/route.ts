@@ -23,6 +23,60 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await auth();
+    if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (session.user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+    const { searchParams } = new URL(req.url);
+    const assignmentId = searchParams.get('assignment_id');
+    if (!assignmentId) return NextResponse.json({ error: 'assignment_id is required' }, { status: 400 });
+
+    // Verify assignment belongs to this project
+    const { data: assignment, error: fetchError } = await supabaseAdmin
+      .from('project_assignments')
+      .select('id, salesperson_id, users!salesperson_id(name)')
+      .eq('id', assignmentId)
+      .eq('project_id', params.id)
+      .single();
+
+    if (fetchError || !assignment) {
+      return NextResponse.json({ error: 'Assignment not found for this project' }, { status: 404 });
+    }
+
+    // Soft delete - set status to inactive
+    const { error: updateError } = await supabaseAdmin
+      .from('project_assignments')
+      .update({ status: 'inactive' })
+      .eq('id', assignmentId);
+
+    if (updateError) {
+      return NextResponse.json({ error: 'Failed to remove assignment' }, { status: 500 });
+    }
+
+    // Audit log
+    await supabaseAdmin.from('audit_logs').insert({
+      user_id: session.user.id,
+      action: 'salesperson_unassigned',
+      metadata: {
+        project_id: params.id,
+        assignment_id: assignmentId,
+        salesperson_id: assignment.salesperson_id,
+        salesperson_name: (assignment as any).users?.name,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Assignment removed successfully',
+      warning: 'Assignment has been deactivated. Historical data is preserved.',
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
@@ -55,9 +109,24 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     const { data: existingAssignment } = await supabaseAdmin.from('project_assignments')
-      .select('id').eq('project_id', project_id).eq('salesperson_id', salesperson_id).single();
+      .select('id, status').eq('project_id', project_id).eq('salesperson_id', salesperson_id).single();
 
-    if (existingAssignment) return NextResponse.json({ error: 'Already assigned' }, { status: 409 });
+    if (existingAssignment) {
+      // Re-activate if previously removed
+      if (existingAssignment.status === 'inactive') {
+        const { error: reactivateError } = await supabaseAdmin.from('project_assignments')
+          .update({ status: 'active' }).eq('id', existingAssignment.id);
+        if (reactivateError) return NextResponse.json({ error: 'Failed to re-activate assignment' }, { status: 500 });
+
+        await supabaseAdmin.from('audit_logs').insert({
+          user_id: session.user.id, action: 'salesperson_reassigned',
+          metadata: { project_id, project_name: project.name, salesperson_id, salesperson_name: salesperson.name }
+        });
+
+        return NextResponse.json({ success: true, message: 'Assignment re-activated' }, { status: 200 });
+      }
+      return NextResponse.json({ error: 'Already assigned' }, { status: 409 });
+    }
 
     const salespersonSlug = salesperson.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     const qrData = await generateQRCodeForAssignment(project.slug, salespersonSlug, salesperson.name);

@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { getSalespersonProjects } from '@/lib/supabase/projects';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { Package, Download, QrCode, ExternalLink } from 'lucide-react';
+import { CopyUrlButton } from '@/components/projects/CopyUrlButton';
 
 export default async function MyProjectsPage() {
   const session = await auth();
@@ -153,15 +154,7 @@ export default async function MyProjectsPage() {
                         readOnly
                         className="flex-1 px-3 py-1.5 bg-gray-50 border border-gray-300 rounded text-xs font-mono"
                       />
-                      <button
-                        onClick={() => {
-                          const fullUrl = `${window.location.origin}${assignment.form_url}`;
-                          navigator.clipboard.writeText(fullUrl);
-                        }}
-                        className="px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-50 transition-colors text-xs"
-                      >
-                        Copy
-                      </button>
+                      <CopyUrlButton formUrl={assignment.form_url} />
                     </div>
                   </div>
 
@@ -169,7 +162,7 @@ export default async function MyProjectsPage() {
                   <div className="grid grid-cols-2 gap-2">
                     <a
                       href={assignment.qr_code_data}
-                      download={`qr-${project?.name.replace(/\s+/g, '-')}.png`}
+                      download={`qr-${(project?.name || 'project').replace(/\s+/g, '-')}.png`}
                       className="flex items-center justify-center gap-2 px-4 py-2 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition-colors text-sm"
                     >
                       <Download className="h-4 w-4" />
