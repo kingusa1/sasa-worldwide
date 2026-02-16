@@ -101,7 +101,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ checkout_url: checkoutUrl, transaction_id: transaction.id });
   } catch (error: any) {
-    console.error('Form submit error:', error);
-    return NextResponse.json({ error: 'An unexpected error occurred. Please try again.' }, { status: 500 });
+    console.error('Form submit error:', error?.message || error);
+    const msg = error?.message?.includes('STRIPE')
+      ? 'Payment system configuration error. Please contact support.'
+      : 'An unexpected error occurred. Please try again.';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

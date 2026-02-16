@@ -45,13 +45,20 @@ export function invalidateStripeModeCache() {
  * Get a Stripe instance with the correct key based on current mode
  */
 export async function getStripe(): Promise<Stripe> {
-  const mode = await getStripeMode();
+  let mode = await getStripeMode();
+
+  // If test mode is selected but test keys aren't configured, fall back to live
+  if (mode === 'test' && !process.env.STRIPE_TEST_SECRET_KEY) {
+    console.warn('Stripe test mode selected but STRIPE_TEST_SECRET_KEY not set, falling back to live mode');
+    mode = 'live';
+  }
+
   const secretKey = mode === 'test'
     ? process.env.STRIPE_TEST_SECRET_KEY
     : process.env.STRIPE_SECRET_KEY;
 
   if (!secretKey) {
-    throw new Error(`STRIPE_${mode === 'test' ? 'TEST_' : ''}SECRET_KEY not set`);
+    throw new Error(`STRIPE_SECRET_KEY not set`);
   }
 
   return new Stripe(secretKey.trim(), {
@@ -64,7 +71,10 @@ export async function getStripe(): Promise<Stripe> {
  * Get the correct publishable key based on current mode
  */
 export async function getStripePublishableKey(): Promise<string> {
-  const mode = await getStripeMode();
+  let mode = await getStripeMode();
+  if (mode === 'test' && !process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY) {
+    mode = 'live';
+  }
   const key = mode === 'test'
     ? process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
     : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
