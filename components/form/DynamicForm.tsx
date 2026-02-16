@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { FormField } from '@/lib/supabase/projects';
-import { StripeCheckoutEmbed } from './StripeCheckoutEmbed';
 
 interface ProductOption {
   name: string;
@@ -45,10 +44,6 @@ export default function DynamicForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  // Step 2: payment
-  const [step, setStep] = useState<'details' | 'payment'>('details');
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const currentProduct = hasMultipleProducts ? products![selectedProduct] : null;
   const currentPrice = currentProduct ? currentProduct.price : price;
@@ -110,16 +105,15 @@ export default function DynamicForm({
           salesperson_id: salespersonId,
           customer_data: formData,
           selected_product_index: hasMultipleProducts ? selectedProduct : 0,
-          ui_mode: 'embedded',
+          ui_mode: 'hosted',
         }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to submit form');
 
-      if (data.client_secret) {
-        setClientSecret(data.client_secret);
-        setStep('payment');
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
       } else {
         throw new Error('Payment setup failed. Please try again.');
       }
@@ -206,63 +200,6 @@ export default function DynamicForm({
     }
   };
 
-  // Payment step - show embedded checkout
-  if (step === 'payment' && clientSecret) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        {/* Header */}
-        <div className="bg-[#002E59] text-white">
-          <div className="max-w-3xl mx-auto px-4 py-6">
-            <div className="flex items-center gap-4">
-              {logoUrl && (
-                <img src={logoUrl} alt={projectName} className="h-10 object-contain brightness-0 invert" />
-              )}
-              <div>
-                <h1 className="text-xl font-bold">{projectName}</h1>
-                <p className="text-blue-200 text-sm">Complete your payment</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <button
-            onClick={() => { setStep('details'); setClientSecret(null); }}
-            className="mb-6 text-sm text-[#002E59] hover:underline flex items-center gap-1"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to details
-          </button>
-
-          {/* Order Summary */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Order Summary</h3>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-gray-700">{currentProductName}</span>
-              <span className="font-semibold">AED {currentPrice.toFixed(2)}</span>
-            </div>
-            <div className="border-t border-gray-200 mt-2 pt-3 flex justify-between items-center">
-              <span className="font-bold text-gray-900">Total</span>
-              <span className="text-xl font-bold text-[#002E59]">AED {currentPrice.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Embedded Checkout */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <StripeCheckoutEmbed clientSecret={clientSecret} publishableKey={stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} />
-          </div>
-
-          <p className="mt-6 text-center text-xs text-gray-400">
-            Secure payment powered by Stripe
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Details step
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
