@@ -31,7 +31,7 @@ export default async function CustomersPage() {
       .select(`
         *,
         referrer:users!customers_referred_by_fkey(id, name, email),
-        sales_transactions(id, amount, created_at, salesperson_id, projects(name), users!sales_transactions_salesperson_id_fkey(name))
+        sales_transactions(id, amount, payment_status, created_at, salesperson_id, projects(name), users!sales_transactions_salesperson_id_fkey(name))
       `)
       .order('created_at', { ascending: false })
       .limit(100);
@@ -112,7 +112,7 @@ export default async function CustomersPage() {
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <p className="text-sm text-gray-600 mb-1">With Purchases</p>
             <p className="text-3xl font-bold text-gray-900">
-              {customers?.filter((c: any) => c.sales_transactions?.length > 0).length || 0}
+              {customers?.filter((c: any) => c.sales_transactions?.some((t: any) => t.payment_status === 'succeeded')).length || 0}
             </p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -123,7 +123,7 @@ export default async function CustomersPage() {
                 ?.reduce((sum: number, c: any) => {
                   return (
                     sum +
-                    (c.sales_transactions?.reduce(
+                    (c.sales_transactions?.filter((t: any) => t.payment_status === 'succeeded').reduce(
                       (s: number, t: any) => s + Number(t.amount),
                       0
                     ) || 0)
@@ -183,7 +183,8 @@ export default async function CustomersPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {customers.map((customer: any) => {
-                    const totalSpent = customer.sales_transactions?.reduce(
+                    const succeededTx = customer.sales_transactions?.filter((t: any) => t.payment_status === 'succeeded') || [];
+                    const totalSpent = succeededTx.reduce(
                       (sum: number, t: any) => sum + Number(t.amount),
                       0
                     ) || 0;
@@ -215,7 +216,7 @@ export default async function CustomersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {customer.sales_transactions?.length || 0}
+                            {succeededTx.length}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
