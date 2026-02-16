@@ -1,12 +1,13 @@
 /**
  * Project Voucher Management Page
- * Upload and manage voucher codes for a project
+ * Upload, manage, and view voucher codes for a project
  */
 
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getProjectById, getVoucherInventory } from '@/lib/supabase/projects';
 import { VoucherUpload } from '@/components/projects/VoucherUpload';
+import { VoucherList } from '@/components/projects/VoucherList';
 import { ArrowLeft, Package } from 'lucide-react';
 import Link from 'next/link';
 
@@ -25,22 +26,24 @@ export default async function ProjectVouchersPage({
     redirect('/');
   }
 
-  // Fetch project and voucher inventory
   const [projectResult, inventoryResult] = await Promise.all([
     getProjectById(params.id),
     getVoucherInventory(params.id),
   ]);
 
   const project = projectResult.data;
-  const inventory = inventoryResult.data || { total: 0, available: 0, sold: 0, reserved: 0, expired: 0 };
+  const inventory = inventoryResult.data || { total: 0, available: 0, sold: 0, reserved: 0, expired: 0, byProduct: {} };
 
   if (!project) {
     redirect('/admin/projects');
   }
 
+  const products = project.products && project.products.length > 0 ? project.products : null;
+  const byProduct = (inventory as any).byProduct || {};
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Link
@@ -67,7 +70,7 @@ export default async function ProjectVouchersPage({
           </div>
         </div>
 
-        {/* Inventory Overview */}
+        {/* Overall Inventory */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Package className="h-6 w-6 text-navy-600" />
@@ -75,36 +78,21 @@ export default async function ProjectVouchersPage({
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Total Vouchers */}
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-1">Total Vouchers</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {inventory.total}
-              </p>
+              <p className="text-3xl font-bold text-gray-900">{inventory.total}</p>
             </div>
-
-            {/* Available */}
             <div className="bg-green-50 rounded-lg p-4">
               <p className="text-sm text-green-600 mb-1">Available</p>
-              <p className="text-3xl font-bold text-green-700">
-                {inventory.available}
-              </p>
+              <p className="text-3xl font-bold text-green-700">{inventory.available}</p>
             </div>
-
-            {/* Sold */}
             <div className="bg-blue-50 rounded-lg p-4">
               <p className="text-sm text-blue-600 mb-1">Sold</p>
-              <p className="text-3xl font-bold text-blue-700">
-                {inventory.sold}
-              </p>
+              <p className="text-3xl font-bold text-blue-700">{inventory.sold}</p>
             </div>
-
-            {/* Reserved */}
             <div className="bg-yellow-50 rounded-lg p-4">
               <p className="text-sm text-yellow-600 mb-1">Reserved</p>
-              <p className="text-3xl font-bold text-yellow-700">
-                {inventory.reserved}
-              </p>
+              <p className="text-3xl font-bold text-yellow-700">{inventory.reserved}</p>
             </div>
           </div>
 
@@ -132,28 +120,69 @@ export default async function ProjectVouchersPage({
           {/* Low Stock Warning */}
           {inventory.available < 10 && inventory.available > 0 && (
             <div className="mt-4 bg-orange-50 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg">
-              <p className="font-semibold">⚠️ Low Stock Alert</p>
+              <p className="font-semibold">Low Stock Alert</p>
               <p className="text-sm">
-                Only {inventory.available} voucher{inventory.available !== 1 ? 's' : ''} remaining. Consider uploading more codes.
+                Only {inventory.available} voucher{inventory.available !== 1 ? 's' : ''} remaining.
               </p>
             </div>
           )}
 
-          {/* Out of Stock Warning */}
           {inventory.available === 0 && inventory.total > 0 && (
             <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              <p className="font-semibold">❌ Out of Stock</p>
-              <p className="text-sm">
-                All vouchers have been sold. Upload more codes to continue selling.
-              </p>
+              <p className="font-semibold">Out of Stock</p>
+              <p className="text-sm">All vouchers have been sold. Upload more codes to continue selling.</p>
             </div>
           )}
         </div>
 
+        {/* Per-Product Inventory */}
+        {products && Object.keys(byProduct).length > 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+            <h2 className="text-xl font-semibold mb-4">Per-Product Inventory</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {products.map((product: any) => {
+                const pInv = byProduct[product.name] || { total: 0, available: 0, sold: 0 };
+                return (
+                  <div key={product.name} className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
+                    <p className="text-xs text-gray-500 mb-3">AED {product.price}</p>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="text-lg font-bold text-gray-900">{pInv.total}</p>
+                        <p className="text-xs text-gray-500">Total</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-green-600">{pInv.available}</p>
+                        <p className="text-xs text-gray-500">Available</p>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-blue-600">{pInv.sold}</p>
+                        <p className="text-xs text-gray-500">Sold</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Upload Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Upload Voucher Codes</h2>
-          <VoucherUpload projectId={params.id} />
+          <VoucherUpload
+            projectId={params.id}
+            products={products || undefined}
+          />
+        </div>
+
+        {/* Voucher List */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold mb-4">All Vouchers</h2>
+          <VoucherList
+            projectId={params.id}
+            products={products || undefined}
+          />
         </div>
       </div>
     </div>

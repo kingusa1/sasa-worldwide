@@ -1,28 +1,36 @@
 'use client';
 
-/**
- * VoucherUpload Component
- * Upload voucher codes from CSV file
- */
-
 import { useState, useRef } from 'react';
-import { Upload, Download, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, Download, CheckCircle2, AlertCircle, Plus, TestTube } from 'lucide-react';
+
+interface ProductItem {
+  name: string;
+  price: number;
+}
 
 interface VoucherUploadProps {
   projectId: string;
+  products?: ProductItem[];
   onUploadComplete?: () => void;
 }
 
-export function VoucherUpload({ projectId, onUploadComplete }: VoucherUploadProps) {
+export function VoucherUpload({ projectId, products, onUploadComplete }: VoucherUploadProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [result, setResult] = useState<{
-    imported: number;
-    duplicates: number;
-    total: number;
-  } | null>(null);
+  const [result, setResult] = useState<{ imported: number; duplicates: number; total: number } | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Manual add state
+  const [manualCode, setManualCode] = useState('');
+  const [manualProduct, setManualProduct] = useState('');
+  const [manualExpiry, setManualExpiry] = useState('');
+  const [manualLoading, setManualLoading] = useState(false);
+  const [manualMessage, setManualMessage] = useState('');
+
+  // Test codes state
+  const [testLoading, setTestLoading] = useState(false);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,19 +42,14 @@ export function VoucherUpload({ projectId, onUploadComplete }: VoucherUploadProp
     setLoading(true);
 
     try {
-      // Validate file type
-      if (!file.name.endsWith('.csv')) {
-        throw new Error('Please upload a CSV file');
-      }
+      if (!file.name.endsWith('.csv')) throw new Error('Please upload a CSV file');
+      if (file.size > 5 * 1024 * 1024) throw new Error('File too large. Maximum size is 5MB');
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('File too large. Maximum size is 5MB');
-      }
-
-      // Upload file
       const formData = new FormData();
       formData.append('file', file);
+      if (selectedProduct) {
+        formData.append('product_name', selectedProduct);
+      }
 
       const response = await fetch(`/api/admin/projects/${projectId}/vouchers/upload`, {
         method: 'POST',
@@ -54,28 +57,12 @@ export function VoucherUpload({ projectId, onUploadComplete }: VoucherUploadProp
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to upload vouchers');
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload vouchers');
-      }
-
-      // Success
       setSuccess(data.message || 'Vouchers uploaded successfully');
-      setResult({
-        imported: data.imported,
-        duplicates: data.duplicates,
-        total: data.total,
-      });
-
-      // Clear file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      // Call callback
-      if (onUploadComplete) {
-        onUploadComplete();
-      }
+      setResult({ imported: data.imported, duplicates: data.duplicates, total: data.total });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      onUploadComplete?.();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -83,9 +70,69 @@ export function VoucherUpload({ projectId, onUploadComplete }: VoucherUploadProp
     }
   };
 
+  const handleManualAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualCode.trim()) return;
+
+    setManualLoading(true);
+    setManualMessage('');
+
+    try {
+      const res = await fetch(`/api/admin/projects/${projectId}/vouchers/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: manualCode.trim(),
+          product_name: manualProduct || null,
+          expires_at: manualExpiry || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add voucher');
+
+      setManualMessage(`Added voucher: ${manualCode.trim().toUpperCase()}`);
+      setManualCode('');
+      onUploadComplete?.();
+    } catch (err: any) {
+      setManualMessage(`Error: ${err.message}`);
+    } finally {
+      setManualLoading(false);
+    }
+  };
+
+  const addTestCodes = async () => {
+    setTestLoading(true);
+    setManualMessage('');
+
+    const productList = products && products.length > 0 ? products : [{ name: 'Default' }];
+    let added = 0;
+    let errors = 0;
+
+    for (const product of productList) {
+      for (let i = 1; i <= 3; i++) {
+        const code = `TEST-${product.name.toUpperCase().replace(/[^A-Z0-9]+/g, '')}-${String(i).padStart(3, '0')}`;
+        try {
+          const res = await fetch(`/api/admin/projects/${projectId}/vouchers/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, product_name: product.name }),
+          });
+          if (res.ok) added++;
+          else errors++;
+        } catch {
+          errors++;
+        }
+      }
+    }
+
+    setManualMessage(`Added ${added} test codes${errors > 0 ? ` (${errors} duplicates skipped)` : ''}`);
+    setTestLoading(false);
+    onUploadComplete?.();
+  };
+
   const downloadTemplate = () => {
-    // Create CSV template
-    const csv = 'code,expires_at\nCAFU-2026-ABC123,2026-12-31\nCAFU-2026-DEF456,2026-12-31\nCAFU-2026-GHI789,2026-12-31';
+    const csv = 'code,expires_at\nVOUCHER-001,2026-12-31\nVOUCHER-002,2026-12-31\nVOUCHER-003,';
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -95,107 +142,176 @@ export function VoucherUpload({ projectId, onUploadComplete }: VoucherUploadProp
     window.URL.revokeObjectURL(url);
   };
 
+  const hasProducts = products && products.length > 0;
+
   return (
-    <div className="space-y-4">
-      {/* Upload Area */}
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-navy-500 transition-colors">
-        <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Upload Voucher Codes
-        </h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Upload a CSV file with voucher codes. Maximum file size: 5MB
-        </p>
+    <div className="space-y-6">
+      {/* CSV Upload Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Upload from CSV</h3>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv"
-          onChange={handleFileSelect}
-          disabled={loading}
-          className="hidden"
-          id="voucher-upload"
-        />
+        {/* Product Selector for Upload */}
+        {hasProducts && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assign to Product
+            </label>
+            <select
+              value={selectedProduct}
+              onChange={(e) => setSelectedProduct(e.target.value)}
+              className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="">-- Select Product --</option>
+              {products!.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name} (AED {p.price})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        <label
-          htmlFor="voucher-upload"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Upload className="h-5 w-5" />
-          {loading ? 'Uploading...' : 'Select CSV File'}
-        </label>
-      </div>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-navy-500 transition-colors">
+          <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+          <p className="text-sm text-gray-600 mb-3">
+            Upload a CSV file with voucher codes{selectedProduct ? ` for ${selectedProduct}` : ''}. Max 5MB.
+          </p>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-semibold text-red-900">Upload Failed</h4>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileSelect}
+            disabled={loading}
+            className="hidden"
+            id="voucher-upload"
+          />
+
+          <div className="flex items-center justify-center gap-3">
+            <label
+              htmlFor="voucher-upload"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition-colors cursor-pointer text-sm"
+            >
+              <Upload className="h-4 w-4" />
+              {loading ? 'Uploading...' : 'Select CSV File'}
+            </label>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"
+            >
+              <Download className="h-4 w-4" />
+              Template
+            </button>
+          </div>
+        </div>
+
+        {/* Error / Success */}
+        {error && (
+          <div className="mt-3 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-red-700">{error}</p>
           </div>
-        </div>
-      )}
-
-      {/* Success Message */}
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <h4 className="font-semibold text-green-900">Upload Successful</h4>
-            <p className="text-sm text-green-700">{success}</p>
-            {result && (
-              <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-green-600 font-semibold">
-                    {result.total}
-                  </p>
-                  <p className="text-green-700">Total Codes</p>
+        )}
+        {success && (
+          <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-green-700">{success}</p>
+              {result && (
+                <div className="mt-2 flex gap-4 text-xs">
+                  <span className="text-green-600">{result.imported} imported</span>
+                  {result.duplicates > 0 && <span className="text-orange-600">{result.duplicates} duplicates</span>}
                 </div>
-                <div>
-                  <p className="text-green-600 font-semibold">
-                    {result.imported}
-                  </p>
-                  <p className="text-green-700">Imported</p>
-                </div>
-                <div>
-                  <p className="text-orange-600 font-semibold">
-                    {result.duplicates}
-                  </p>
-                  <p className="text-orange-700">Duplicates Skipped</p>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+        )}
+
+        {/* CSV Format */}
+        <div className="mt-3 text-xs text-gray-500">
+          CSV must have a <code className="bg-gray-100 px-1 rounded">code</code> column. Optional: <code className="bg-gray-100 px-1 rounded">expires_at</code> (YYYY-MM-DD).
         </div>
-      )}
+      </div>
 
-      {/* CSV Format Guide */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 mb-2">CSV Format</h4>
-        <p className="text-sm text-blue-700 mb-3">
-          Your CSV file should have the following format:
+      {/* Divider */}
+      <hr className="border-gray-200" />
+
+      {/* Manual Add Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Add Voucher Manually</h3>
+        <form onSubmit={handleManualAdd} className="flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs text-gray-500 mb-1">Voucher Code</label>
+            <input
+              type="text"
+              value={manualCode}
+              onChange={(e) => setManualCode(e.target.value)}
+              placeholder="e.g. CAFU-2026-ABC123"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+          </div>
+
+          {hasProducts && (
+            <div className="w-48">
+              <label className="block text-xs text-gray-500 mb-1">Product</label>
+              <select
+                value={manualProduct}
+                onChange={(e) => setManualProduct(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">-- Select --</option>
+                {products!.map((p) => (
+                  <option key={p.name} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="w-40">
+            <label className="block text-xs text-gray-500 mb-1">Expiry (optional)</label>
+            <input
+              type="date"
+              value={manualExpiry}
+              onChange={(e) => setManualExpiry(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={manualLoading || !manualCode.trim()}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm disabled:opacity-50 flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            {manualLoading ? 'Adding...' : 'Add Code'}
+          </button>
+        </form>
+
+        {manualMessage && (
+          <p className={`mt-2 text-sm ${manualMessage.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
+            {manualMessage}
+          </p>
+        )}
+      </div>
+
+      {/* Divider */}
+      <hr className="border-gray-200" />
+
+      {/* Test Codes */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Test Codes</h3>
+        <p className="text-sm text-gray-600 mb-3">
+          Add 3 dummy voucher codes{hasProducts ? ' per product' : ''} for testing purposes.
         </p>
-        <pre className="bg-white border border-blue-200 rounded p-3 text-sm font-mono text-gray-800 overflow-x-auto">
-          {`code,expires_at
-CAFU-2026-ABC123,2026-12-31
-CAFU-2026-DEF456,2026-12-31
-CAFU-2026-GHI789,`}
-        </pre>
-        <ul className="mt-3 text-sm text-blue-700 space-y-1 list-disc list-inside">
-          <li>First row must be headers: <code className="bg-white px-1 rounded">code,expires_at</code></li>
-          <li>The <code className="bg-white px-1 rounded">code</code> column is required</li>
-          <li>The <code className="bg-white px-1 rounded">expires_at</code> column is optional (format: YYYY-MM-DD)</li>
-          <li>Duplicate codes will be automatically skipped</li>
-        </ul>
-
         <button
-          type="button"
-          onClick={downloadTemplate}
-          className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          onClick={addTestCodes}
+          disabled={testLoading}
+          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm disabled:opacity-50 flex items-center gap-2"
         >
-          <Download className="h-4 w-4" />
-          Download Template
+          <TestTube className="h-4 w-4" />
+          {testLoading ? 'Adding Test Codes...' : 'Add Test Codes'}
         </button>
       </div>
     </div>

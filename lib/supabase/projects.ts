@@ -89,7 +89,7 @@ export async function getProjectBySlug(slug: string) {
 
 export async function getVoucherInventory(projectId: string) {
   try {
-    const { data, error } = await supabaseAdmin.from('voucher_codes').select('status').eq('project_id', projectId);
+    const { data, error } = await supabaseAdmin.from('voucher_codes').select('status, product_name').eq('project_id', projectId);
     if (error) {
       console.error('Error fetching voucher inventory:', error);
       return { data: null, error };
@@ -99,8 +99,23 @@ export async function getVoucherInventory(projectId: string) {
       available: data.filter(v => v.status === 'available').length,
       sold: data.filter(v => v.status === 'sold').length,
       reserved: data.filter(v => v.status === 'reserved').length,
-      expired: data.filter(v => v.status === 'expired').length
+      expired: data.filter(v => v.status === 'expired').length,
+      byProduct: {} as Record<string, { total: number; available: number; sold: number; reserved: number; expired: number }>,
     };
+
+    // Build per-product breakdown
+    for (const v of data) {
+      const pName = v.product_name || 'Unassigned';
+      if (!inventory.byProduct[pName]) {
+        inventory.byProduct[pName] = { total: 0, available: 0, sold: 0, reserved: 0, expired: 0 };
+      }
+      inventory.byProduct[pName].total++;
+      if (v.status === 'available') inventory.byProduct[pName].available++;
+      else if (v.status === 'sold') inventory.byProduct[pName].sold++;
+      else if (v.status === 'reserved') inventory.byProduct[pName].reserved++;
+      else if (v.status === 'expired') inventory.byProduct[pName].expired++;
+    }
+
     return { data: inventory, error: null };
   } catch (error: any) {
     console.error('Unexpected error fetching voucher inventory:', error);

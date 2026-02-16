@@ -18,6 +18,7 @@ interface VoucherEmailData {
   name: string;
   voucherCode: string;
   projectName: string;
+  productName?: string;
   amount: number;
 }
 
@@ -34,7 +35,7 @@ export async function sendVoucherEmail(data: VoucherEmailData): Promise<void> {
     const info = await transporter.sendMail({
       from: fromEmail,
       to: data.to,
-      subject: `Your ${data.projectName} - Voucher Code`,
+      subject: `Your ${data.productName || data.projectName} - Voucher Code`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -51,7 +52,7 @@ export async function sendVoucherEmail(data: VoucherEmailData): Promise<void> {
 
           <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
             <p style="font-size: 16px; margin-top: 0;">Hi ${data.name},</p>
-            <p style="font-size: 16px;">Thank you for your purchase! Here are your details:</p>
+            <p style="font-size: 16px;">Thank you for purchasing <strong>${data.productName || data.projectName}</strong>! Here are your details:</p>
 
             <div style="background: white; border: 2px solid #002E59; border-radius: 8px; padding: 20px; margin: 25px 0;">
               <p style="margin: 0; font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px;">Your Voucher Code</p>
@@ -60,6 +61,7 @@ export async function sendVoucherEmail(data: VoucherEmailData): Promise<void> {
 
             <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
               <p style="margin: 0; font-size: 14px;"><strong>Project:</strong> ${data.projectName}</p>
+              ${data.productName ? `<p style="margin: 10px 0 0 0; font-size: 14px;"><strong>Product:</strong> ${data.productName}</p>` : ''}
               <p style="margin: 10px 0 0 0; font-size: 14px;"><strong>Amount Paid:</strong> AED ${data.amount.toFixed(2)}</p>
             </div>
 

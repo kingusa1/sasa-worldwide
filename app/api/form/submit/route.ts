@@ -52,8 +52,15 @@ export async function POST(req: NextRequest) {
 
     if (customerError || !customer) return NextResponse.json({ error: 'Failed to create customer record' }, { status: 500 });
 
-    const { count: availableVouchers } = await supabaseAdmin.from('voucher_codes').select('id', { count: 'exact', head: true })
+    let voucherQuery = supabaseAdmin.from('voucher_codes').select('id', { count: 'exact', head: true })
       .eq('project_id', project_id).eq('status', 'available');
+
+    // Filter by product name if a product was selected
+    if (selectedProductName && project.products && project.products.length > 0) {
+      voucherQuery = voucherQuery.eq('product_name', selectedProductName);
+    }
+
+    const { count: availableVouchers } = await voucherQuery;
 
     if (!availableVouchers || availableVouchers === 0) {
       return NextResponse.json({ error: 'Sorry, this product is currently out of stock. Please contact support.' }, { status: 400 });

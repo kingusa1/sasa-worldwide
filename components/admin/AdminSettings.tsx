@@ -1,19 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function AdminSettings() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [stripeMode, setStripeMode] = useState<'test' | 'live'>('live');
+  const [loadingSettings, setLoadingSettings] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.settings?.stripe_mode) {
+          setStripeMode(data.settings.stripe_mode);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingSettings(false));
+  }, []);
+
+  const toggleStripeMode = async (newMode: 'test' | 'live') => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'stripe_mode', value: newMode }),
+      });
+      if (res.ok) {
+        setStripeMode(newMode);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {}
+    setSaving(false);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
-
-    // Simulate save
     await new Promise(resolve => setTimeout(resolve, 1000));
-
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -21,6 +49,68 @@ export function AdminSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Stripe Test Mode Banner */}
+      {stripeMode === 'test' && (
+        <div className="bg-orange-100 border-2 border-orange-400 rounded-lg p-4 flex items-center gap-3">
+          <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">TEST MODE</div>
+          <p className="text-orange-800 font-medium">
+            Stripe is in test mode. All payments will use test keys. Switch to live mode before going to production.
+          </p>
+        </div>
+      )}
+
+      {/* Payment Gateway Settings */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Payment Gateway (Stripe)</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">Stripe Mode</label>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => toggleStripeMode('live')}
+                disabled={saving || loadingSettings}
+                className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                  stripeMode === 'live'
+                    ? 'bg-green-600 text-white ring-2 ring-green-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Live Mode
+              </button>
+              <button
+                onClick={() => toggleStripeMode('test')}
+                disabled={saving || loadingSettings}
+                className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                  stripeMode === 'test'
+                    ? 'bg-orange-500 text-white ring-2 ring-orange-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Test Mode
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              {stripeMode === 'test'
+                ? 'Test mode uses test API keys. No real charges will be made. Use card 4242 4242 4242 4242 for testing.'
+                : 'Live mode processes real payments. Make sure your Stripe account is fully set up.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <p className="text-sm text-gray-600">Current Mode</p>
+              <p className={`text-lg font-semibold ${stripeMode === 'test' ? 'text-orange-600' : 'text-green-600'}`}>
+                {loadingSettings ? 'Loading...' : stripeMode === 'test' ? 'Test' : 'Live'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Payment Status</p>
+              <p className="text-lg font-semibold text-green-600">✓ Connected</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* System Information */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">System Information</h2>
@@ -51,174 +141,13 @@ export function AdminSettings() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Email Settings</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Admin Email Address
-            </label>
-            <input
-              type="email"
-              defaultValue="it@sasa-worldwide.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Email address for admin notifications (new signups, system alerts)
-            </p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Admin Email Address</label>
+            <input type="email" defaultValue="it@sasa-worldwide.com" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent" />
+            <p className="mt-1 text-xs text-gray-500">Email address for admin notifications</p>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              From Name
-            </label>
-            <input
-              type="text"
-              defaultValue="SASA Worldwide"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reply-To Email
-            </label>
-            <input
-              type="email"
-              defaultValue="noreply@sasa-worldwide.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-          </div>
-        </form>
-      </div>
-
-      {/* Authentication Settings */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Authentication Settings</h2>
-        <form onSubmit={handleSave} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Session Duration (days)
-            </label>
-            <input
-              type="number"
-              defaultValue={30}
-              min={1}
-              max={90}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Verification Token Expiry (hours)
-            </label>
-            <input
-              type="number"
-              defaultValue={24}
-              min={1}
-              max={168}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password Reset Token Expiry (hours)
-            </label>
-            <input
-              type="number"
-              defaultValue={1}
-              min={1}
-              max={24}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-          </div>
-
-          <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="require-email-verification"
-              defaultChecked={true}
-              className="mt-1 rounded border-gray-300 text-navy focus:ring-navy"
-            />
-            <div>
-              <label htmlFor="require-email-verification" className="text-sm font-medium text-gray-700">
-                Require email verification for new accounts
-              </label>
-              <p className="text-xs text-gray-500">
-                Users must verify their email before their account can be approved
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="auto-approve-affiliates"
-              defaultChecked={true}
-              className="mt-1 rounded border-gray-300 text-navy focus:ring-navy"
-            />
-            <div>
-              <label htmlFor="auto-approve-affiliates" className="text-sm font-medium text-gray-700">
-                Auto-approve affiliate accounts
-              </label>
-              <p className="text-xs text-gray-500">
-                Affiliate accounts get instant access without admin approval
-              </p>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      {/* Staff Registration Settings */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Staff Registration Settings</h2>
-        <form onSubmit={handleSave} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Allowed Email Domain
-            </label>
-            <input
-              type="text"
-              defaultValue="sasa-worldwide.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Only emails from this domain can register as staff
-            </p>
-          </div>
-
-          <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="require-employee-id"
-              defaultChecked={true}
-              disabled
-              className="mt-1 rounded border-gray-300 text-navy focus:ring-navy"
-            />
-            <div>
-              <label htmlFor="require-employee-id" className="text-sm font-medium text-gray-700">
-                Require admin-provided employee ID for staff registration
-              </label>
-              <p className="text-xs text-gray-500">
-                Staff members must use an employee ID created by admin (cannot be disabled)
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="require-staff-approval"
-              defaultChecked={true}
-              disabled
-              className="mt-1 rounded border-gray-300 text-navy focus:ring-navy"
-            />
-            <div>
-              <label htmlFor="require-staff-approval" className="text-sm font-medium text-gray-700">
-                Require admin approval for staff accounts
-              </label>
-              <p className="text-xs text-gray-500">
-                Staff accounts require admin approval before activation (cannot be disabled)
-              </p>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">From Name</label>
+            <input type="text" defaultValue="SASA Worldwide" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent" />
           </div>
         </form>
       </div>
@@ -228,86 +157,18 @@ export function AdminSettings() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Security Settings</h2>
         <div className="space-y-4">
           <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="log-all-actions"
-              defaultChecked={true}
-              className="mt-1 rounded border-gray-300 text-navy focus:ring-navy"
-            />
+            <input type="checkbox" id="log-all-actions" defaultChecked={true} className="mt-1 rounded border-gray-300 text-navy focus:ring-navy" />
             <div>
-              <label htmlFor="log-all-actions" className="text-sm font-medium text-gray-700">
-                Log all user actions
-              </label>
-              <p className="text-xs text-gray-500">
-                Record all authentication and administrative actions in audit logs
-              </p>
+              <label htmlFor="log-all-actions" className="text-sm font-medium text-gray-700">Log all user actions</label>
+              <p className="text-xs text-gray-500">Record all authentication and administrative actions in audit logs</p>
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password Minimum Length
-            </label>
-            <input
-              type="number"
-              defaultValue={8}
-              min={8}
-              max={32}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-            />
-          </div>
-
           <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="require-strong-password"
-              defaultChecked={true}
-              className="mt-1 rounded border-gray-300 text-navy focus:ring-navy"
-            />
+            <input type="checkbox" id="require-staff-approval" defaultChecked={true} disabled className="mt-1 rounded border-gray-300 text-navy focus:ring-navy" />
             <div>
-              <label htmlFor="require-strong-password" className="text-sm font-medium text-gray-700">
-                Require strong passwords
-              </label>
-              <p className="text-xs text-gray-500">
-                Passwords must contain uppercase, lowercase, and numbers
-              </p>
+              <label htmlFor="require-staff-approval" className="text-sm font-medium text-gray-700">Require admin approval for staff accounts</label>
+              <p className="text-xs text-gray-500">Staff accounts require admin approval before activation (cannot be disabled)</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
-      <div className="bg-white rounded-lg shadow-sm border-2 border-red-200 p-6">
-        <h2 className="text-xl font-bold text-red-600 mb-4">Danger Zone</h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-            <div>
-              <h3 className="font-semibold text-gray-900">Clear All Audit Logs</h3>
-              <p className="text-sm text-gray-600">
-                Permanently delete all audit logs from the system
-              </p>
-            </div>
-            <button
-              type="button"
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
-            >
-              Clear Logs
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-            <div>
-              <h3 className="font-semibold text-gray-900">Reset System Configuration</h3>
-              <p className="text-sm text-gray-600">
-                Reset all settings to default values
-              </p>
-            </div>
-            <button
-              type="button"
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
-            >
-              Reset
-            </button>
           </div>
         </div>
       </div>

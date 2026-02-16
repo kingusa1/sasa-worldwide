@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { stripe } from '@/lib/stripe';
+import { getStripe, getWebhookSecret } from '@/lib/stripe';
 import { sendVoucherEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
@@ -13,7 +13,8 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) {
+    const webhookSecret = await getWebhookSecret();
+    if (!signature || !webhookSecret) {
       console.error('Missing signature or webhook secret');
       return NextResponse.json(
         { error: 'Webhook signature verification failed' },
@@ -21,11 +22,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    const stripeClient = await getStripe();
+    event = stripeClient.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
     return NextResponse.json(
@@ -64,7 +62,7 @@ export async function POST(req: NextRequest) {
         .select(`
           *,
           projects!inner(id, name, slug),
-          customers!inner(id, email, name)
+          customers!inner(id, email, name, phone)
         `)
         .eq('id', transaction_id)
         .single();
@@ -73,9 +71,15 @@ export async function POST(req: NextRequest) {
         throw new Error(`Transaction not found: ${transaction_id}`);
       }
 
+      // Get selected product name for per-product voucher claiming
+      const selectedProduct = transaction.form_data?.selected_product || null;
+
       const { data: voucher, error: voucherError } = await supabaseAdmin.rpc(
         'claim_next_available_voucher',
-        { p_project_id: transaction.project_id }
+        {
+          p_project_id: transaction.project_id,
+          p_product_name: selectedProduct,
+        }
       );
 
       if (voucherError || !voucher || voucher.length === 0) {
@@ -87,7 +91,7 @@ export async function POST(req: NextRequest) {
           })
           .eq('id', transaction_id);
 
-        console.error(`No vouchers available for project ${transaction.project_id}`);
+        console.error(`No vouchers available for project ${transaction.project_id}${selectedProduct ? ` product ${selectedProduct}` : ''}`);
 
         return NextResponse.json({
           received: true,
@@ -108,6 +112,7 @@ export async function POST(req: NextRequest) {
           name: transaction.customers.name,
           voucherCode: claimedVoucher.code,
           projectName: transaction.projects.name,
+          productName: selectedProduct || undefined,
           amount: transaction.amount,
         });
 
@@ -140,6 +145,7 @@ export async function POST(req: NextRequest) {
           voucher_code: claimedVoucher.code,
           project_id: transaction.project_id,
           project_name: transaction.projects.name,
+          product_name: selectedProduct,
           customer_id: transaction.customer_id,
           customer_email: transaction.customers.email,
           amount: transaction.amount,

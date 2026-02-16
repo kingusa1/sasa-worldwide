@@ -1,17 +1,91 @@
 /**
  * Stripe Utility Functions
+ * Supports test/live mode toggle via app_settings table
  */
 
 import Stripe from 'stripe';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+// Cache stripe mode to avoid hitting DB on every call
+let cachedStripeMode: 'test' | 'live' | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 60_000; // 1 minute
+
+/**
+ * Get current Stripe mode from database (cached)
+ */
+export async function getStripeMode(): Promise<'test' | 'live'> {
+  const now = Date.now();
+  if (cachedStripeMode && (now - cacheTimestamp) < CACHE_TTL) {
+    return cachedStripeMode;
+  }
+  try {
+    const { data } = await supabaseAdmin
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'stripe_mode')
+      .single();
+    cachedStripeMode = data?.value === 'test' ? 'test' : 'live';
+  } catch {
+    cachedStripeMode = 'live'; // fallback to live
+  }
+  cacheTimestamp = now;
+  return cachedStripeMode;
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY.trim(), {
-  apiVersion: '2026-01-28.clover',
-  typescript: true,
-});
+/**
+ * Invalidate the cached mode (call after admin changes mode)
+ */
+export function invalidateStripeModeCache() {
+  cachedStripeMode = null;
+  cacheTimestamp = 0;
+}
+
+/**
+ * Get a Stripe instance with the correct key based on current mode
+ */
+export async function getStripe(): Promise<Stripe> {
+  const mode = await getStripeMode();
+  const secretKey = mode === 'test'
+    ? process.env.STRIPE_TEST_SECRET_KEY
+    : process.env.STRIPE_SECRET_KEY;
+
+  if (!secretKey) {
+    throw new Error(`STRIPE_${mode === 'test' ? 'TEST_' : ''}SECRET_KEY not set`);
+  }
+
+  return new Stripe(secretKey.trim(), {
+    apiVersion: '2026-01-28.clover' as any,
+    typescript: true,
+  });
+}
+
+/**
+ * Get the correct publishable key based on current mode
+ */
+export async function getStripePublishableKey(): Promise<string> {
+  const mode = await getStripeMode();
+  const key = mode === 'test'
+    ? process.env.NEXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY
+    : process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  return key || '';
+}
+
+/**
+ * Get the correct webhook secret based on current mode
+ */
+export async function getWebhookSecret(): Promise<string> {
+  const mode = await getStripeMode();
+  return mode === 'test'
+    ? (process.env.STRIPE_TEST_WEBHOOK_SECRET || '')
+    : (process.env.STRIPE_WEBHOOK_SECRET || '');
+}
+
+// Backwards-compatible default instance (always live)
+export const stripe = new Stripe(
+  (process.env.STRIPE_SECRET_KEY || 'sk_missing').trim(),
+  { apiVersion: '2026-01-28.clover' as any, typescript: true }
+);
 
 /**
  * Create or update Stripe product for a project
@@ -23,51 +97,37 @@ export async function createOrUpdateStripeProduct(
   existingProductId?: string,
   existingPriceId?: string
 ): Promise<{ productId: string; priceId: string }> {
+  const stripeClient = await getStripe();
   try {
     let productId = existingProductId;
 
-    // Create or update product
     if (productId) {
-      await stripe.products.update(productId, {
+      await stripeClient.products.update(productId, {
         name: projectName,
         active: true,
-        metadata: {
-          project_id: projectId,
-        },
+        metadata: { project_id: projectId },
       });
     } else {
-      const product = await stripe.products.create({
+      const product = await stripeClient.products.create({
         name: projectName,
         active: true,
-        metadata: {
-          project_id: projectId,
-        },
+        metadata: { project_id: projectId },
       });
       productId = product.id;
     }
 
-    // Create new price (prices are immutable in Stripe)
-    // Archive old price if it exists
     if (existingPriceId) {
-      await stripe.prices.update(existingPriceId, {
-        active: false,
-      });
+      await stripeClient.prices.update(existingPriceId, { active: false });
     }
 
-    const stripePrice = await stripe.prices.create({
+    const stripePrice = await stripeClient.prices.create({
       product: productId,
-      currency: 'aed', // UAE Dirham
-      unit_amount: Math.round(price * 100), // Convert to cents
-      metadata: {
-        project_id: projectId,
-      },
+      currency: 'aed',
+      unit_amount: Math.round(price * 100),
+      metadata: { project_id: projectId },
     });
 
-    return {
-      productId,
-      priceId: stripePrice.id,
-    };
-
+    return { productId, priceId: stripePrice.id };
   } catch (error: any) {
     console.error('Stripe product/price creation error:', error);
     throw new Error(`Failed to create Stripe product/price: ${error.message}`);
@@ -84,9 +144,7 @@ export async function createStripeProducts(
   const results = [];
   for (const product of products) {
     const { productId, priceId } = await createOrUpdateStripeProduct(
-      projectId,
-      product.name,
-      product.price
+      projectId, product.name, product.price
     );
     results.push({
       name: product.name,
@@ -100,28 +158,19 @@ export async function createStripeProducts(
 
 /**
  * Create Stripe Embedded Checkout session
- * Returns client_secret for inline payment rendering
  */
 export async function createEmbeddedCheckoutSession(
   priceId: string,
   customerEmail: string,
-  metadata: {
-    transaction_id: string;
-    project_id: string;
-    salesperson_id: string;
-  },
+  metadata: { transaction_id: string; project_id: string; salesperson_id: string },
   returnUrl: string
 ): Promise<string> {
+  const stripeClient = await getStripe();
   try {
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       metadata,
       payment_intent_data: { metadata },
       customer_email: customerEmail,
@@ -133,7 +182,6 @@ export async function createEmbeddedCheckoutSession(
     if (!session.client_secret) {
       throw new Error('Stripe client secret not generated');
     }
-
     return session.client_secret;
   } catch (error: any) {
     console.error('Stripe embedded checkout session error:', error);
@@ -147,38 +195,28 @@ export async function createEmbeddedCheckoutSession(
 export async function createCheckoutSession(
   priceId: string,
   customerEmail: string,
-  metadata: {
-    transaction_id: string;
-    project_id: string;
-    salesperson_id: string;
-  },
+  metadata: { transaction_id: string; project_id: string; salesperson_id: string },
   successUrl: string,
   cancelUrl: string
 ): Promise<string> {
+  const stripeClient = await getStripe();
   try {
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       metadata,
       payment_intent_data: { metadata },
       customer_email: customerEmail,
       success_url: successUrl,
       cancel_url: cancelUrl,
-      expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes
+      expires_at: Math.floor(Date.now() / 1000) + (30 * 60),
     });
 
     if (!session.url) {
       throw new Error('Stripe session URL not generated');
     }
-
     return session.url;
-
   } catch (error: any) {
     console.error('Stripe checkout session creation error:', error);
     throw new Error(`Failed to create checkout session: ${error.message}`);

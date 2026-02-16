@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { getStripePublishableKey } from '@/lib/stripe';
 import DynamicForm from '@/components/form/DynamicForm';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
   if (!assignment) notFound();
 
   const assignedUser = Array.isArray(assignment.users) ? assignment.users[0] : assignment.users;
+  const stripePublishableKey = await getStripePublishableKey();
 
   return (
     <>
@@ -45,6 +47,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
         logoUrl={project.logo_url || undefined}
         products={project.products && project.products.length > 0 ? project.products : undefined}
         salespersonName={(assignedUser as any).name}
+        stripePublishableKey={stripePublishableKey}
       />
     </>
   );

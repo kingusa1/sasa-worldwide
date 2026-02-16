@@ -23,6 +23,7 @@ interface DynamicFormProps {
   logoUrl?: string;
   products?: ProductOption[];
   salespersonName?: string;
+  stripePublishableKey?: string;
 }
 
 export default function DynamicForm({
@@ -35,6 +36,7 @@ export default function DynamicForm({
   logoUrl,
   products,
   salespersonName,
+  stripePublishableKey,
 }: DynamicFormProps) {
   const hasMultipleProducts = products && products.length > 1;
   const [selectedProduct, setSelectedProduct] = useState<number>(0);
@@ -249,7 +251,7 @@ export default function DynamicForm({
 
           {/* Embedded Checkout */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <StripeCheckoutEmbed clientSecret={clientSecret} />
+            <StripeCheckoutEmbed clientSecret={clientSecret} publishableKey={stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''} />
           </div>
 
           <p className="mt-6 text-center text-xs text-gray-400">

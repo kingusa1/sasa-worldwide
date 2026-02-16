@@ -1,19 +1,19 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
 interface StripeCheckoutEmbedProps {
   clientSecret: string;
+  publishableKey: string;
 }
 
-export function StripeCheckoutEmbed({ clientSecret }: StripeCheckoutEmbedProps) {
+export function StripeCheckoutEmbed({ clientSecret, publishableKey }: StripeCheckoutEmbedProps) {
+  const stripePromise = useMemo(() => loadStripe(publishableKey), [publishableKey]);
   const options = { clientSecret };
 
   return (

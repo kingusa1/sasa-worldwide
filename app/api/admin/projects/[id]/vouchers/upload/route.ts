@@ -17,6 +17,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    const productName = formData.get('product_name') as string | null;
     if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     if (!file.name.endsWith('.csv')) return NextResponse.json({ error: 'File must be a CSV' }, { status: 400 });
     if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
@@ -41,6 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const vouchers = records.map((record: any) => ({
       project_id, code: record.code.trim().toUpperCase(), status: 'available',
+      product_name: productName || null,
       expires_at: record.expires_at ? new Date(record.expires_at).toISOString() : null
     }));
 
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     await supabaseAdmin.from('audit_logs').insert({
       user_id: session.user.id, action: 'voucher_upload',
-      metadata: { project_id, project_name: project.name, total_codes: vouchers.length, imported, duplicates }
+      metadata: { project_id, project_name: project.name, product_name: productName, total_codes: vouchers.length, imported, duplicates }
     });
 
     return NextResponse.json({
