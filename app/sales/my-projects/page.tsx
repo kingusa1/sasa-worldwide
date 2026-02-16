@@ -126,7 +126,7 @@ export default async function MyProjectsPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Price:</span>
                       <span className="font-semibold">
-                        AED {Number(project?.price).toFixed(2)}
+                        AED {Number(project?.price || 0).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm mt-1">
@@ -134,8 +134,8 @@ export default async function MyProjectsPage() {
                       <span className="font-semibold text-green-600">
                         AED{' '}
                         {(
-                          (Number(project?.price) *
-                            Number(project?.commission_rate)) /
+                          (Number(project?.price || 0) *
+                            Number(project?.commission_rate || 0)) /
                           100
                         ).toFixed(2)}
                       </span>

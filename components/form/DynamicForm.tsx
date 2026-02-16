@@ -396,9 +396,9 @@ export default function DynamicForm({
                     />
                     <span className="text-xs text-gray-600 leading-relaxed">
                       I agree to the{' '}
-                      <a href="#" className="text-[#002E59] underline">Terms & Conditions</a>
+                      <a href="/terms" target="_blank" className="text-[#002E59] underline">Terms & Conditions</a>
                       {' '}and{' '}
-                      <a href="#" className="text-[#002E59] underline">Privacy Policy</a>
+                      <a href="/privacy" target="_blank" className="text-[#002E59] underline">Privacy Policy</a>
                     </span>
                   </label>
                   {errors['terms'] && (

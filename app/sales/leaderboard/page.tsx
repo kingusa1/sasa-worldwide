@@ -109,7 +109,7 @@ export default async function SalesLeaderboardPage() {
     if (entry) {
       entry.totalSales += 1;
       entry.totalRevenue += Number(t.amount);
-      entry.totalCommission += Number(t.commission_amount);
+      entry.totalCommission += Number(t.commission_amount || 0);
       if (new Date(t.created_at) >= thisMonthStart) {
         entry.monthSales += 1;
         entry.monthRevenue += Number(t.amount);

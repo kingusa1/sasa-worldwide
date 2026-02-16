@@ -49,7 +49,7 @@ export default async function ProjectDetailPage({
   const inventory = inventoryResult.data || { total: 0, available: 0, sold: 0, reserved: 0, expired: 0 };
   const assignments = assignmentsResult.data || [];
   const transactions = transactionsResult.data || [];
-  const totalRevenue = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalRevenue = transactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
   const totalCommissions = transactions.reduce((sum, t) => sum + Number(t.commission_amount || 0), 0);
 
   const statusColors: Record<string, string> = {
@@ -142,7 +142,7 @@ export default async function ProjectDetailPage({
           </div>
           <div>
             <p className="text-sm text-gray-600">Cost of Goods</p>
-            <p className="text-xl font-bold text-gray-900">AED {Number(project.cost_of_goods).toFixed(2)}</p>
+            <p className="text-xl font-bold text-gray-900">AED {Number(project.cost_of_goods || 0).toFixed(2)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Commission Rate</p>
@@ -151,7 +151,7 @@ export default async function ProjectDetailPage({
           <div>
             <p className="text-sm text-gray-600">Profit per Sale</p>
             <p className="text-xl font-bold text-green-600">
-              AED {(Number(project.price) - Number(project.cost_of_goods) - (Number(project.price) * Number(project.commission_rate) / 100)).toFixed(2)}
+              AED {(Number(project.price) - Number(project.cost_of_goods || 0) - (Number(project.price) * Number(project.commission_rate || 0) / 100)).toFixed(2)}
             </p>
           </div>
         </div>
