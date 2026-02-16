@@ -16,8 +16,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only sales staff can view their dashboard
-    if (session.user.role !== 'staff' && session.user.role !== 'admin') {
+    // Only sales staff and affiliates can view their dashboard
+    if (session.user.role !== 'staff' && session.user.role !== 'admin' && session.user.role !== 'affiliate') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

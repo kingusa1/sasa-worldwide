@@ -47,7 +47,7 @@ export default async function ProjectDetailPage({
   }
 
   const inventory = inventoryResult.data || { total: 0, available: 0, sold: 0, reserved: 0, expired: 0 };
-  const assignments = assignmentsResult.data || [];
+  const assignments = (assignmentsResult.data || []).filter((a: any) => a.status === 'active');
   const transactions = transactionsResult.data || [];
   const totalRevenue = transactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
   const totalCommissions = transactions.reduce((sum, t) => sum + Number(t.commission_amount || 0), 0);

@@ -29,8 +29,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins and sales staff can export customer data
-    if (session.user.role !== 'admin' && session.user.role !== 'staff') {
+    // Only admins, sales staff, and affiliates can export customer data
+    if (session.user.role !== 'admin' && session.user.role !== 'staff' && session.user.role !== 'affiliate') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

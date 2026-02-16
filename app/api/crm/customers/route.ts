@@ -19,8 +19,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins and sales staff can view customers
-    if (session.user.role !== 'admin' && session.user.role !== 'staff') {
+    // Only admins, sales staff, and affiliates can view customers
+    if (session.user.role !== 'admin' && session.user.role !== 'staff' && session.user.role !== 'affiliate') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -87,8 +87,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins and sales staff can create customers
-    if (session.user.role !== 'admin' && session.user.role !== 'staff') {
+    // Only admins, sales staff, and affiliates can create customers
+    if (session.user.role !== 'admin' && session.user.role !== 'staff' && session.user.role !== 'affiliate') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
