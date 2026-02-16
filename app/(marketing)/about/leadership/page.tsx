@@ -3,15 +3,7 @@
 import Link from 'next/link';
 
 const leadership = [
-  {
-    name: 'Salah Elgemiabby',
-    role: 'Co-Founder & Executive Director',
-    shortRole: 'Co-Founder',
-    initials: 'SE',
-    color: 'from-blue-500 to-blue-700',
-    bio: 'Salah brings visionary leadership and strategic direction to SASA Worldwide. With extensive experience in sales operations and business development across the UAE, he has built SASA into a leading performance growth engine. His focus on excellence and innovation drives the company\'s mission to transform sales operations.',
-    expertise: ['Strategic Leadership', 'Business Development', 'Sales Operations', 'Market Expansion'],
-  },
+  // Co-Founders
   {
     name: 'Adam Qureshi',
     role: 'Co-Founder & Executive Director',
@@ -21,6 +13,16 @@ const leadership = [
     bio: 'Adam leads SASA\'s sales strategy and client acquisition efforts. His deep understanding of the UAE market and proven track record in building high-performing sales teams ensures that SASA consistently delivers exceptional results for clients across all seven Emirates.',
     expertise: ['Sales Strategy', 'Client Relations', 'Team Building', 'Revenue Growth'],
   },
+  {
+    name: 'Salah Elgemiabby',
+    role: 'Co-Founder & Executive Director',
+    shortRole: 'Co-Founder',
+    initials: 'SE',
+    color: 'from-blue-500 to-blue-700',
+    bio: 'Salah brings visionary leadership and strategic direction to SASA Worldwide. With extensive experience in sales operations and business development across the UAE, he has built SASA into a leading performance growth engine. His focus on excellence and innovation drives the company\'s mission to transform sales operations.',
+    expertise: ['Strategic Leadership', 'Business Development', 'Sales Operations', 'Market Expansion'],
+  },
+  // C-Suite
   {
     name: 'Ahmed Abdulmutal',
     role: 'Chief Operations Officer',
@@ -57,6 +59,43 @@ const leadership = [
     bio: 'Dr. Malaz provides strategic guidance and operational partnership to drive SASA\'s long-term success. Her academic background combined with practical business acumen enables her to bridge strategy and execution, ensuring sustainable growth and organizational excellence.',
     expertise: ['Strategic Planning', 'Business Partnerships', 'Organizational Development', 'Research & Insights'],
   },
+  // Sales Directors
+  {
+    name: 'Mazen',
+    role: 'Sales Director',
+    shortRole: 'Sales Director',
+    initials: 'MZ',
+    color: 'from-emerald-500 to-emerald-700',
+    bio: 'Mazen leads high-performing sales teams across key territories, driving revenue growth and client satisfaction. His hands-on leadership style and deep understanding of the UAE market enable him to consistently exceed targets and develop future sales leaders.',
+    expertise: ['Sales Leadership', 'Territory Management', 'Team Development', 'Revenue Growth'],
+  },
+  {
+    name: 'Masnun Taher',
+    role: 'Sales Director',
+    shortRole: 'Sales Director',
+    initials: 'MT',
+    color: 'from-cyan-500 to-cyan-700',
+    bio: 'Masnun Taher brings strategic sales expertise and operational discipline to SASA\'s field operations. His ability to build and scale sales teams while maintaining high performance standards makes him a key driver of the company\'s growth across the Emirates.',
+    expertise: ['Field Operations', 'Sales Strategy', 'Performance Management', 'Client Acquisition'],
+  },
+  {
+    name: 'Joseph Mocoly',
+    role: 'Sales Director',
+    shortRole: 'Sales Director',
+    initials: 'JM',
+    color: 'from-amber-500 to-amber-700',
+    bio: 'Joseph Mocoly directs sales operations with a focus on client engagement and market expansion. His proven track record in building strong client relationships and delivering measurable results drives SASA\'s continued success in competitive markets.',
+    expertise: ['Client Engagement', 'Market Expansion', 'Sales Operations', 'Relationship Building'],
+  },
+  {
+    name: 'Jonathan Pol Men',
+    role: 'Sales Director',
+    shortRole: 'Sales Director',
+    initials: 'JP',
+    color: 'from-violet-500 to-violet-700',
+    bio: 'Jonathan Pol Men oversees strategic sales initiatives and drives performance across multiple campaign verticals. His leadership in developing innovative sales approaches and mentoring teams ensures consistent delivery of exceptional results for SASA\'s clients.',
+    expertise: ['Campaign Management', 'Sales Innovation', 'Team Mentorship', 'Strategic Initiatives'],
+  },
 ];
 
 export default function LeadershipPage() {
@@ -90,7 +129,7 @@ export default function LeadershipPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <span className="section-badge text-navy mb-10 block">LEADERSHIP TEAM</span>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {leadership.map((person, index) => (
               <a
                 key={index}

@@ -12,14 +12,14 @@ const timeline = [
 
 const leadership = [
   {
-    name: 'Salah Elgemiabby',
-    role: 'Co-Founder & Executive Director',
-    description: 'Visionary leader driving SASA\'s mission to revolutionize sales operations across the UAE.',
-  },
-  {
     name: 'Adam Qureshi',
     role: 'Co-Founder & Executive Director',
     description: 'Strategic partner building SASA into the UAE\'s leading sales operations company.',
+  },
+  {
+    name: 'Salah Elgemiabby',
+    role: 'Co-Founder & Executive Director',
+    description: 'Visionary leader driving SASA\'s mission to revolutionize sales operations across the UAE.',
   },
   {
     name: 'Ahmed Abdulmutal',
@@ -40,6 +40,26 @@ const leadership = [
     name: 'Dr. Malaz Elgemiabby',
     role: 'Chief Strategic Operations Partner',
     description: 'Strategic advisor guiding long-term vision and business development initiatives.',
+  },
+  {
+    name: 'Mazen',
+    role: 'Sales Director',
+    description: 'Leads high-performing sales teams, driving revenue growth across key territories.',
+  },
+  {
+    name: 'Masnun Taher',
+    role: 'Sales Director',
+    description: 'Brings strategic sales expertise and operational discipline to field operations.',
+  },
+  {
+    name: 'Joseph Mocoly',
+    role: 'Sales Director',
+    description: 'Directs sales operations with a focus on client engagement and market expansion.',
+  },
+  {
+    name: 'Jonathan Pol Men',
+    role: 'Sales Director',
+    description: 'Oversees strategic sales initiatives and drives performance across campaign verticals.',
   },
 ];
 
@@ -219,22 +239,22 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
             {leadership.map((person, index) => (
               <div
                 key={index}
-                className="bg-cream rounded-2xl p-8 text-center hover:shadow-card transition-shadow"
+                className="bg-cream rounded-2xl p-6 text-center hover:shadow-card transition-shadow"
               >
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-navy flex items-center justify-center">
-                  <span className="text-2xl font-bold text-white">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-navy flex items-center justify-center">
+                  <span className="text-xl font-bold text-white">
                     {person.name.split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-navy mb-1">
+                <h3 className="text-base font-bold text-navy mb-1">
                   {person.name}
                 </h3>
-                <div className="text-navy/70 text-sm font-medium mb-4">{person.role}</div>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <div className="text-navy/70 text-xs font-medium mb-3">{person.role}</div>
+                <p className="text-gray-600 text-xs leading-relaxed">
                   {person.description}
                 </p>
               </div>
