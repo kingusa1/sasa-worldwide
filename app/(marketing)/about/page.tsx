@@ -52,12 +52,12 @@ const leadership = [
     description: 'Brings strategic sales expertise and operational discipline to field operations.',
   },
   {
-    name: 'Joseph Mocoly',
+    name: 'Joseph McCauley',
     role: 'Sales Director',
     description: 'Directs sales operations with a focus on client engagement and market expansion.',
   },
   {
-    name: 'Jonathan Pol Men',
+    name: 'Jonathan Bulmer',
     role: 'Sales Director',
     description: 'Oversees strategic sales initiatives and drives performance across campaign verticals.',
   },
