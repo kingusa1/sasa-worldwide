@@ -53,6 +53,7 @@ export default async function ProjectEditPage({
           commission_rate: project.commission_rate,
           status: project.status,
           form_fields: project.form_fields || [],
+          products: project.products || [],
         }}
         projectId={params.id}
       />

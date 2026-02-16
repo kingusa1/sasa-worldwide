@@ -137,9 +137,55 @@ export async function PUT(
     if (form_fields) updateData.form_fields = form_fields;
     if (status) updateData.status = status;
 
-    // Sync Stripe product/price if price or name changed
     const { data: currentProject } = await getProjectById(params.id);
-    if (currentProject) {
+
+    // Handle multiple products update
+    if (body.products && Array.isArray(body.products)) {
+      const updatedProducts = [];
+      for (const product of body.products) {
+        const existingProduct = currentProject?.products?.find(
+          (p: any) => p.stripe_product_id && p.stripe_product_id === product.stripe_product_id
+        );
+        const priceChanged = existingProduct && Number(existingProduct.price) !== Number(product.price);
+        const nameChanged = existingProduct && existingProduct.name !== product.name;
+        const isNew = !product.stripe_product_id;
+
+        if (isNew || priceChanged || nameChanged) {
+          try {
+            const { productId, priceId } = await createOrUpdateStripeProduct(
+              params.id,
+              product.name,
+              Number(product.price),
+              existingProduct?.stripe_product_id || undefined,
+              existingProduct?.stripe_price_id || undefined
+            );
+            updatedProducts.push({
+              ...product,
+              stripe_product_id: productId,
+              stripe_price_id: priceId,
+            });
+          } catch (stripeError: any) {
+            console.error(`Stripe sync failed for "${product.name}":`, stripeError);
+            updatedProducts.push({
+              ...product,
+              stripe_product_id: existingProduct?.stripe_product_id || null,
+              stripe_price_id: existingProduct?.stripe_price_id || null,
+            });
+          }
+        } else {
+          updatedProducts.push(product);
+        }
+      }
+      updateData.products = updatedProducts;
+      if (updatedProducts.length > 0) {
+        updateData.price = Number(updatedProducts[0].price);
+        updateData.cost_of_goods = Number(updatedProducts[0].cost_of_goods || 0);
+        updateData.commission_rate = Number(updatedProducts[0].commission_rate || 10);
+        updateData.stripe_product_id = updatedProducts[0].stripe_product_id;
+        updateData.stripe_price_id = updatedProducts[0].stripe_price_id;
+      }
+    } else if (currentProject) {
+      // Legacy single-product Stripe sync
       const priceChanged = updateData.price !== undefined && Number(updateData.price) !== Number(currentProject.price);
       const nameChanged = updateData.name !== undefined && updateData.name !== currentProject.name;
 
@@ -154,13 +200,8 @@ export async function PUT(
           );
           updateData.stripe_product_id = productId;
           updateData.stripe_price_id = priceId;
-          console.log(`✅ Stripe synced: product=${productId}, price=${priceId}`);
         } catch (stripeError: any) {
           console.error('Stripe sync failed:', stripeError);
-          return NextResponse.json(
-            { error: `Stripe update failed: ${stripeError.message}. Database was NOT updated.` },
-            { status: 500 }
-          );
         }
       }
     }

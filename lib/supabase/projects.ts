@@ -12,6 +12,16 @@ export interface FormField {
   placeholder?: string;
 }
 
+export interface ProductItem {
+  id?: string;
+  name: string;
+  price: number;
+  cost_of_goods: number;
+  commission_rate: number;
+  stripe_product_id?: string;
+  stripe_price_id?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -24,6 +34,7 @@ export interface Project {
   commission_rate: number;
   status: ProjectStatus;
   form_fields: FormField[];
+  products?: ProductItem[];
   stripe_product_id?: string;
   stripe_price_id?: string;
   created_by?: string;
@@ -100,7 +111,7 @@ export async function getVoucherInventory(projectId: string) {
 export async function getProjectAssignments(projectId: string) {
   try {
     const { data, error } = await supabaseAdmin.from('project_assignments')
-      .select('id, form_url, qr_code_url, qr_code_data, status, assigned_at, users!salesperson_id(id, name, email)')
+      .select('id, salesperson_id, form_url, qr_code_url, qr_code_data, status, assigned_at, users!salesperson_id(id, name, email)')
       .eq('project_id', projectId).order('assigned_at', { ascending: false });
     if (error) {
       console.error('Error fetching project assignments:', error);

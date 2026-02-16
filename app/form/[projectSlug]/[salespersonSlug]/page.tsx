@@ -35,7 +35,12 @@ export default async function FormPage({ params, searchParams }: PageProps) {
           {project.logo_url && <img src={project.logo_url} alt={project.name} className="h-20 mx-auto mb-4" />}
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.name}</h1>
           {project.description && <p className="text-lg text-gray-600">{project.description}</p>}
-          <p className="text-2xl font-bold text-navy mt-4">AED {project.price.toFixed(2)}</p>
+          {(!project.products || project.products.length <= 1) && (
+            <p className="text-2xl font-bold text-navy mt-4">AED {project.price.toFixed(2)}</p>
+          )}
+          {project.products && project.products.length > 1 && (
+            <p className="text-sm text-gray-500 mt-4">Choose your plan below</p>
+          )}
         </div>
         {searchParams.cancelled && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -50,6 +55,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
             projectName={project.name}
             price={project.price}
             logoUrl={project.logo_url}
+            products={project.products && project.products.length > 0 ? project.products : undefined}
           />
         </div>
         <div className="mt-8 text-center text-sm text-gray-600">

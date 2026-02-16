@@ -10,6 +10,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { ArrowLeft, QrCode, Download, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { AssignSalespersonForm } from '@/components/projects/AssignSalespersonForm';
+import { CopyUrlButton } from '@/components/projects/CopyUrlButton';
 import { ServerError } from '@/components/ui/ErrorBanner';
 
 export default async function ProjectAssignmentsPage({
@@ -171,15 +172,7 @@ export default async function ProjectAssignmentsPage({
                         readOnly
                         className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm font-mono"
                       />
-                      <button
-                        onClick={() => {
-                          const fullUrl = `${window.location.origin}${assignment.form_url}`;
-                          navigator.clipboard.writeText(fullUrl);
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                      >
-                        Copy
-                      </button>
+                      <CopyUrlButton formUrl={assignment.form_url} />
                     </div>
                   </div>
 
@@ -187,7 +180,7 @@ export default async function ProjectAssignmentsPage({
                   <div className="flex gap-2">
                     <a
                       href={assignment.qr_code_data}
-                      download={`qr-${assignment.users?.name.replace(/\s+/g, '-')}.png`}
+                      download={`qr-${(assignment.users?.name || 'salesperson').replace(/\s+/g, '-')}.png`}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition-colors text-sm"
                     >
                       <Download className="h-4 w-4" />

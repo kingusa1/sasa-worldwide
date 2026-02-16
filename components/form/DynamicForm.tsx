@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import { FormField } from '@/lib/supabase/projects';
 
+interface ProductOption {
+  name: string;
+  price: number;
+  stripe_price_id?: string;
+  cost_of_goods?: number;
+  commission_rate?: number;
+}
+
 interface DynamicFormProps {
   projectId: string;
   salespersonId: string;
@@ -10,6 +18,7 @@ interface DynamicFormProps {
   projectName: string;
   price: number;
   logoUrl?: string;
+  products?: ProductOption[];
 }
 
 export default function DynamicForm({
@@ -19,11 +28,16 @@ export default function DynamicForm({
   projectName,
   price,
   logoUrl,
+  products,
 }: DynamicFormProps) {
+  const hasMultipleProducts = products && products.length > 1;
+  const [selectedProduct, setSelectedProduct] = useState<number>(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const currentPrice = hasMultipleProducts ? products[selectedProduct].price : price;
 
   const handleChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -83,6 +97,7 @@ export default function DynamicForm({
           project_id: projectId,
           salesperson_id: salespersonId,
           customer_data: formData,
+          selected_product_index: hasMultipleProducts ? selectedProduct : 0,
         }),
       });
 
@@ -176,14 +191,58 @@ export default function DynamicForm({
               )}
               <div className="text-center">
                 <h1 className="text-3xl font-bold text-white">{projectName}</h1>
-                <p className="mt-2 text-lg text-gray-200">
-                  AED {price.toFixed(2)}
-                </p>
+                {!hasMultipleProducts && (
+                  <p className="mt-2 text-lg text-gray-200">
+                    AED {currentPrice.toFixed(2)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="px-6 py-8 sm:px-10">
+            {/* Product Selection for multiple products */}
+            {hasMultipleProducts && (
+              <div className="mb-8">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Select Your Plan *
+                </label>
+                <div className="space-y-3">
+                  {products.map((product, index) => (
+                    <label
+                      key={index}
+                      className={`flex items-center justify-between p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        selectedProduct === index
+                          ? 'border-navy bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          name="product_selection"
+                          checked={selectedProduct === index}
+                          onChange={() => setSelectedProduct(index)}
+                          className="h-4 w-4 text-navy focus:ring-navy border-gray-300"
+                          disabled={isSubmitting}
+                        />
+                        <span className={`ml-3 font-medium ${
+                          selectedProduct === index ? 'text-navy' : 'text-gray-700'
+                        }`}>
+                          {product.name}
+                        </span>
+                      </div>
+                      <span className={`text-lg font-bold ${
+                        selectedProduct === index ? 'text-navy' : 'text-gray-500'
+                      }`}>
+                        AED {product.price.toFixed(2)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-6">
               {formFields.map((field) => (
                 <div key={field.name}>
@@ -239,7 +298,7 @@ export default function DynamicForm({
                     Processing...
                   </div>
                 ) : (
-                  `Pay AED ${price.toFixed(2)}`
+                  `Pay AED ${currentPrice.toFixed(2)}`
                 )}
               </button>
             </div>

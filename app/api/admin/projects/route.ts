@@ -34,44 +34,99 @@ export async function POST(req: NextRequest) {
     if (session.user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json();
-    const { name, slug, project_type, description, logo_url, price, cost_of_goods, commission_rate, form_fields, status } = body;
+    const { name, slug, project_type, description, logo_url, products: productsInput, form_fields, status } = body;
 
-    if (!name || !slug || !project_type || !price || !form_fields) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // Support both legacy single-product and new multi-product format
+    let products = productsInput;
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      // Fallback to legacy single product fields
+      const { price, cost_of_goods, commission_rate } = body;
+      if (!price || price <= 0) {
+        return NextResponse.json({ error: 'At least one product with a valid price is required' }, { status: 400 });
+      }
+      products = [{ name: name, price, cost_of_goods: cost_of_goods || 0, commission_rate: commission_rate || 10 }];
     }
 
-    if (price <= 0) return NextResponse.json({ error: 'Price must be greater than 0' }, { status: 400 });
+    if (!name || !slug || !project_type || !form_fields) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
     if (!Array.isArray(form_fields) || form_fields.length === 0) {
       return NextResponse.json({ error: 'form_fields must be a non-empty array' }, { status: 400 });
+    }
+
+    // Validate all products
+    for (const p of products) {
+      if (!p.name || !p.price || p.price <= 0) {
+        return NextResponse.json({ error: `Product "${p.name || 'unnamed'}" must have a name and positive price` }, { status: 400 });
+      }
     }
 
     const { data: existingProject } = await supabaseAdmin.from('projects').select('id').eq('slug', slug).single();
     if (existingProject) return NextResponse.json({ error: 'Slug already exists' }, { status: 409 });
 
-    let stripe_product_id, stripe_price_id;
-    try {
-      const { productId, priceId } = await createOrUpdateStripeProduct('temp_id', name, price);
-      stripe_product_id = productId;
-      stripe_price_id = priceId;
-    } catch (stripeError: any) {
-      return NextResponse.json({ error: 'Failed to create Stripe product' }, { status: 500 });
+    // Create Stripe products for each product
+    const stripeProducts = [];
+    let stripeWarning = null;
+
+    for (const product of products) {
+      try {
+        const { productId, priceId } = await createOrUpdateStripeProduct('temp_id', product.name, product.price);
+        stripeProducts.push({
+          ...product,
+          stripe_product_id: productId,
+          stripe_price_id: priceId,
+        });
+      } catch (stripeError: any) {
+        console.error(`Stripe product creation failed for "${product.name}":`, stripeError);
+        stripeWarning = `Stripe setup partially failed: ${stripeError.message}. You can configure Stripe later.`;
+        stripeProducts.push({
+          ...product,
+          stripe_product_id: null,
+          stripe_price_id: null,
+        });
+      }
     }
 
-    const { data: project, error: projectError } = await supabaseAdmin.from('projects').insert({
-      name, slug, project_type, description: description || null, logo_url: logo_url || null,
-      price, cost_of_goods: cost_of_goods || 0, commission_rate: commission_rate || 10,
-      status: status || 'draft', form_fields, stripe_product_id, stripe_price_id, created_by: session.user.id
-    }).select().single();
+    // Use the first product's data for the legacy single-product columns
+    const primaryProduct = stripeProducts[0];
 
-    if (projectError) return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+    const insertData: any = {
+      name, slug, project_type,
+      description: description || null,
+      logo_url: logo_url || null,
+      price: primaryProduct.price,
+      cost_of_goods: primaryProduct.cost_of_goods || 0,
+      commission_rate: primaryProduct.commission_rate || 10,
+      status: status || 'draft',
+      form_fields,
+      products: stripeProducts,
+      stripe_product_id: primaryProduct.stripe_product_id,
+      stripe_price_id: primaryProduct.stripe_price_id,
+      created_by: session.user.id
+    };
+
+    const { data: project, error: projectError } = await supabaseAdmin
+      .from('projects')
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (projectError) {
+      console.error('Project insert error:', projectError);
+      return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+    }
 
     await supabaseAdmin.from('audit_logs').insert({
       user_id: session.user.id, action: 'project_created',
-      metadata: { project_id: project.id, project_name: name, project_type, price }
+      metadata: { project_id: project.id, project_name: name, project_type, products_count: stripeProducts.length }
     });
 
-    return NextResponse.json({ project }, { status: 201 });
+    return NextResponse.json({
+      project,
+      ...(stripeWarning ? { warning: stripeWarning } : {}),
+    }, { status: 201 });
   } catch (error: any) {
+    console.error('Project creation error:', error);
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

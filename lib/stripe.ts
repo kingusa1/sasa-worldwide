@@ -8,7 +8,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY environment variable is not set');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY.trim(), {
   apiVersion: '2026-01-28.clover',
   typescript: true,
 });
@@ -72,6 +72,30 @@ export async function createOrUpdateStripeProduct(
     console.error('Stripe product/price creation error:', error);
     throw new Error(`Failed to create Stripe product/price: ${error.message}`);
   }
+}
+
+/**
+ * Create Stripe products for multiple products in a project
+ */
+export async function createStripeProducts(
+  projectId: string,
+  products: Array<{ name: string; price: number }>
+): Promise<Array<{ name: string; price: number; stripe_product_id: string; stripe_price_id: string }>> {
+  const results = [];
+  for (const product of products) {
+    const { productId, priceId } = await createOrUpdateStripeProduct(
+      projectId,
+      product.name,
+      product.price
+    );
+    results.push({
+      name: product.name,
+      price: product.price,
+      stripe_product_id: productId,
+      stripe_price_id: priceId,
+    });
+  }
+  return results;
 }
 
 /**
