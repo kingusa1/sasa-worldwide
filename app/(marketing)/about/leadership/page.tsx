@@ -3,24 +3,15 @@
 import Link from 'next/link';
 
 const leadership = [
-  // Co-Founders
+  // Founder & CEO
   {
-    name: 'Adam Qureshi',
-    role: 'Co-Founder & Executive Director',
-    shortRole: 'Co-Founder',
-    initials: 'AQ',
+    name: 'Adam',
+    role: 'Founder & CEO',
+    shortRole: 'Founder & CEO',
+    initials: 'A',
     color: 'from-teal-500 to-teal-700',
-    bio: 'Adam leads SASA\'s sales strategy and client acquisition efforts. His deep understanding of the UAE market and proven track record in building high-performing sales teams ensures that SASA consistently delivers exceptional results for clients across all seven Emirates.',
-    expertise: ['Sales Strategy', 'Client Relations', 'Team Building', 'Revenue Growth'],
-  },
-  {
-    name: 'Salah Elgemiabby',
-    role: 'Co-Founder & Executive Director',
-    shortRole: 'Co-Founder',
-    initials: 'SE',
-    color: 'from-blue-500 to-blue-700',
-    bio: 'Salah brings visionary leadership and strategic direction to SASA Worldwide. With extensive experience in sales operations and business development across the UAE, he has built SASA into a leading performance growth engine. His focus on excellence and innovation drives the company\'s mission to transform sales operations.',
-    expertise: ['Strategic Leadership', 'Business Development', 'Sales Operations', 'Market Expansion'],
+    bio: 'Adam is the Founder and CEO of Sasa Worldwide, a global training and technology company specialising in sales mastery, AI education, and business development. With over four years of experience in the direct sales industry, Adam has built and scaled high-performance teams across the UK, developing over 75 active agents and generating more than 1,500 weekly customer acquisitions. Operating within a wider network producing over 3,500–4,000 weekly sales, he has consistently created leaders from entry-level positions into management. Adam is known for his high standards, direct leadership style, and ability to build winning environments focused on performance, discipline, and growth. His current focus is expanding Sasa Worldwide internationally while equipping individuals with future-proof skills in sales, AI, and digital systems.',
+    expertise: ['Sales Mastery', 'AI Education', 'Team Building', 'Business Development'],
   },
   // C-Suite
   {
@@ -61,6 +52,15 @@ const leadership = [
   },
   // Sales Directors
   {
+    name: 'Salah Elgemiabby',
+    role: 'Sales Director',
+    shortRole: 'Sales Director',
+    initials: 'SE',
+    color: 'from-blue-500 to-blue-700',
+    bio: 'Salah Elgemiabby is a Sales Director at Sasa Worldwide, specialising in team development, performance management, and business expansion. With a strong background in direct sales, Salah has built a reputation for creating structured, results-driven environments where individuals are held to high standards and consistently perform. He plays a key role in developing new markets and ensuring operational excellence across teams. His leadership is focused on accountability, discipline, and scalable growth. Salah is committed to helping individuals maximise their earning potential while contributing to the company\'s long-term expansion into international markets and AI-driven services.',
+    expertise: ['Team Development', 'Performance Management', 'Business Expansion', 'Operational Excellence'],
+  },
+  {
     name: 'Mazen',
     role: 'Sales Director',
     shortRole: 'Sales Director',
@@ -75,8 +75,8 @@ const leadership = [
     shortRole: 'Sales Director',
     initials: 'MT',
     color: 'from-cyan-500 to-cyan-700',
-    bio: 'Masnun Taher brings strategic sales expertise and operational discipline to SASA\'s field operations. His ability to build and scale sales teams while maintaining high performance standards makes him a key driver of the company\'s growth across the Emirates.',
-    expertise: ['Field Operations', 'Sales Strategy', 'Performance Management', 'Client Acquisition'],
+    bio: 'Masnun Taher is a Sales Director at Sasa Worldwide, responsible for driving sales performance and developing high-performing individuals. Having progressed through the sales industry, Masnun understands what it takes to succeed from the ground up. He is known for his strong work ethic, consistency, and ability to lead by example. Masnun focuses on training, mindset, and daily execution, helping individuals build confidence and achieve measurable results in competitive sales environments. His goal is to develop the next generation of leaders within Sasa Worldwide while maintaining high standards across all teams.',
+    expertise: ['Sales Performance', 'Training & Mindset', 'Daily Execution', 'Leadership Development'],
   },
   {
     name: 'Joseph McCauley',
@@ -84,8 +84,8 @@ const leadership = [
     shortRole: 'Sales Director',
     initials: 'JM',
     color: 'from-amber-500 to-amber-700',
-    bio: 'Joseph McCauley directs sales operations with a focus on client engagement and market expansion. His proven track record in building strong client relationships and delivering measurable results drives SASA\'s continued success in competitive markets.',
-    expertise: ['Client Engagement', 'Market Expansion', 'Sales Operations', 'Relationship Building'],
+    bio: 'Joseph McCauley is a Sales Director at Sasa Worldwide, specialising in client acquisition, sales strategy, and team leadership. With extensive experience in face-to-face sales, Joseph has developed a strong ability to build rapport quickly, handle objections effectively, and consistently deliver results. He is passionate about mentoring individuals and helping them transition from entry-level roles into leadership positions within the organisation. Joseph plays a key role in driving revenue growth while ensuring that the company\'s sales systems remain effective, scalable, and results-focused.',
+    expertise: ['Client Acquisition', 'Sales Strategy', 'Team Leadership', 'Mentoring'],
   },
   {
     name: 'Jonathan Bulmer',
@@ -93,8 +93,8 @@ const leadership = [
     shortRole: 'Sales Director',
     initials: 'JB',
     color: 'from-violet-500 to-violet-700',
-    bio: 'Jonathan Bulmer oversees strategic sales initiatives and drives performance across multiple campaign verticals. His leadership in developing innovative sales approaches and mentoring teams ensures consistent delivery of exceptional results for SASA\'s clients.',
-    expertise: ['Campaign Management', 'Sales Innovation', 'Team Mentorship', 'Strategic Initiatives'],
+    bio: 'Jonathan Bulmer is a Sales Director at Sasa Worldwide, focusing on training, development, and performance improvement. With a background in direct sales, Jonathan has built his career on discipline, consistency, and continuous growth. He specialises in helping individuals develop both the mindset and skillset required to succeed in sales. He is responsible for maintaining high standards across teams, ensuring that every individual is equipped to perform at a high level. Jonathan is committed to building a strong culture within Sasa Worldwide, where individuals are supported to grow and achieve long-term success.',
+    expertise: ['Training & Development', 'Performance Improvement', 'Team Standards', 'Culture Building'],
   },
 ];
 

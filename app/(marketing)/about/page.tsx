@@ -12,14 +12,9 @@ const timeline = [
 
 const leadership = [
   {
-    name: 'Adam Qureshi',
-    role: 'Co-Founder & Executive Director',
-    description: 'Strategic partner building SASA into the UAE\'s leading sales operations company.',
-  },
-  {
-    name: 'Salah Elgemiabby',
-    role: 'Co-Founder & Executive Director',
-    description: 'Visionary leader driving SASA\'s mission to revolutionize sales operations across the UAE.',
+    name: 'Adam',
+    role: 'Founder & CEO',
+    description: 'Founder and CEO specialising in sales mastery, AI education, and building high-performance teams internationally.',
   },
   {
     name: 'Ahmed Abdulmutal',
@@ -42,6 +37,11 @@ const leadership = [
     description: 'Strategic advisor guiding long-term vision and business development initiatives.',
   },
   {
+    name: 'Salah Elgemiabby',
+    role: 'Sales Director',
+    description: 'Specialises in team development, performance management, and business expansion.',
+  },
+  {
     name: 'Mazen',
     role: 'Sales Director',
     description: 'Leads high-performing sales teams, driving revenue growth across key territories.',
@@ -49,17 +49,17 @@ const leadership = [
   {
     name: 'Masnun Taher',
     role: 'Sales Director',
-    description: 'Brings strategic sales expertise and operational discipline to field operations.',
+    description: 'Drives sales performance and develops high-performing individuals from the ground up.',
   },
   {
     name: 'Joseph McCauley',
     role: 'Sales Director',
-    description: 'Directs sales operations with a focus on client engagement and market expansion.',
+    description: 'Specialises in client acquisition, sales strategy, and mentoring future leaders.',
   },
   {
     name: 'Jonathan Bulmer',
     role: 'Sales Director',
-    description: 'Oversees strategic sales initiatives and drives performance across campaign verticals.',
+    description: 'Focuses on training, development, and building a strong performance culture.',
   },
 ];
 
