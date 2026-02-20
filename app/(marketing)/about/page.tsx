@@ -13,8 +13,13 @@ const timeline = [
 const leadership = [
   {
     name: 'Adam',
-    role: 'Founder & CEO',
-    description: 'Founder and CEO specialising in sales mastery, AI education, and building high-performance teams internationally.',
+    role: 'Co-Founder & CEO',
+    description: 'Co-Founder and CEO specialising in sales mastery, AI education, and building high-performance teams internationally.',
+  },
+  {
+    name: 'Salah Elgemiabby',
+    role: 'Co-Founder & Sales Director',
+    description: 'Co-Founder specialising in team development, performance management, and business expansion.',
   },
   {
     name: 'Ahmed Abdulmutal',
@@ -35,16 +40,6 @@ const leadership = [
     name: 'Dr. Malaz Elgemiabby',
     role: 'Chief Strategic Operations Partner',
     description: 'Strategic advisor guiding long-term vision and business development initiatives.',
-  },
-  {
-    name: 'Salah Elgemiabby',
-    role: 'Sales Director',
-    description: 'Specialises in team development, performance management, and business expansion.',
-  },
-  {
-    name: 'Mazen',
-    role: 'Sales Director',
-    description: 'Leads high-performing sales teams, driving revenue growth across key territories.',
   },
   {
     name: 'Masnun Taher',

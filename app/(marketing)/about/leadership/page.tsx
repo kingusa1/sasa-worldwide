@@ -3,15 +3,24 @@
 import Link from 'next/link';
 
 const leadership = [
-  // Founder & CEO
+  // Co-Founders
   {
     name: 'Adam',
-    role: 'Founder & CEO',
-    shortRole: 'Founder & CEO',
+    role: 'Co-Founder & CEO',
+    shortRole: 'Co-Founder',
     initials: 'A',
     color: 'from-teal-500 to-teal-700',
-    bio: 'Adam is the Founder and CEO of Sasa Worldwide, a global training and technology company specialising in sales mastery, AI education, and business development. With over four years of experience in the direct sales industry, Adam has built and scaled high-performance teams across the UK, developing over 75 active agents and generating more than 1,500 weekly customer acquisitions. Operating within a wider network producing over 3,500–4,000 weekly sales, he has consistently created leaders from entry-level positions into management. Adam is known for his high standards, direct leadership style, and ability to build winning environments focused on performance, discipline, and growth. His current focus is expanding Sasa Worldwide internationally while equipping individuals with future-proof skills in sales, AI, and digital systems.',
+    bio: 'Adam is the Co-Founder and CEO of Sasa Worldwide, a global training and technology company specialising in sales mastery, AI education, and business development. With over four years of experience in the direct sales industry, Adam has built and scaled high-performance teams across the UK, developing over 75 active agents and generating more than 1,500 weekly customer acquisitions. Operating within a wider network producing over 3,500–4,000 weekly sales, he has consistently created leaders from entry-level positions into management. Adam is known for his high standards, direct leadership style, and ability to build winning environments focused on performance, discipline, and growth. His current focus is expanding Sasa Worldwide internationally while equipping individuals with future-proof skills in sales, AI, and digital systems.',
     expertise: ['Sales Mastery', 'AI Education', 'Team Building', 'Business Development'],
+  },
+  {
+    name: 'Salah Elgemiabby',
+    role: 'Co-Founder & Sales Director',
+    shortRole: 'Co-Founder',
+    initials: 'SE',
+    color: 'from-blue-500 to-blue-700',
+    bio: 'Salah Elgemiabby is a Co-Founder and Sales Director at Sasa Worldwide, specialising in team development, performance management, and business expansion. With a strong background in direct sales, Salah has built a reputation for creating structured, results-driven environments where individuals are held to high standards and consistently perform. He plays a key role in developing new markets and ensuring operational excellence across teams. His leadership is focused on accountability, discipline, and scalable growth. Salah is committed to helping individuals maximise their earning potential while contributing to the company\'s long-term expansion into international markets and AI-driven services.',
+    expertise: ['Team Development', 'Performance Management', 'Business Expansion', 'Operational Excellence'],
   },
   // C-Suite
   {
@@ -51,24 +60,6 @@ const leadership = [
     expertise: ['Strategic Planning', 'Business Partnerships', 'Organizational Development', 'Research & Insights'],
   },
   // Sales Directors
-  {
-    name: 'Salah Elgemiabby',
-    role: 'Sales Director',
-    shortRole: 'Sales Director',
-    initials: 'SE',
-    color: 'from-blue-500 to-blue-700',
-    bio: 'Salah Elgemiabby is a Sales Director at Sasa Worldwide, specialising in team development, performance management, and business expansion. With a strong background in direct sales, Salah has built a reputation for creating structured, results-driven environments where individuals are held to high standards and consistently perform. He plays a key role in developing new markets and ensuring operational excellence across teams. His leadership is focused on accountability, discipline, and scalable growth. Salah is committed to helping individuals maximise their earning potential while contributing to the company\'s long-term expansion into international markets and AI-driven services.',
-    expertise: ['Team Development', 'Performance Management', 'Business Expansion', 'Operational Excellence'],
-  },
-  {
-    name: 'Mazen',
-    role: 'Sales Director',
-    shortRole: 'Sales Director',
-    initials: 'MZ',
-    color: 'from-emerald-500 to-emerald-700',
-    bio: 'Mazen leads high-performing sales teams across key territories, driving revenue growth and client satisfaction. His hands-on leadership style and deep understanding of the UAE market enable him to consistently exceed targets and develop future sales leaders.',
-    expertise: ['Sales Leadership', 'Territory Management', 'Team Development', 'Revenue Growth'],
-  },
   {
     name: 'Masnun Taher',
     role: 'Sales Director',
