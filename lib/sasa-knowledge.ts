@@ -156,7 +156,7 @@ export const SASA_KNOWLEDGE = {
   },
 
   website: {
-    clientPortal: "https://sasa-worldwide.app.clientclub.net/",
+    trainingAcademy: "/training",
     pages: {
       home: "/",
       about: "/about",

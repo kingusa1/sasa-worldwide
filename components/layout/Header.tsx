@@ -35,7 +35,7 @@ const navLinks = [
       { href: '/recruitment', label: 'Recruitment' },
       { href: '/csr', label: 'CSR' },
       { href: '/affiliate', label: 'Affiliate Program' },
-      { href: '/client-portal', label: 'SASA Academy' },
+      { href: '/training', label: 'SASA Academy' },
     ]
   },
 ];

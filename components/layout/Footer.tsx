@@ -7,7 +7,7 @@ const quickLinks = [
   { href: '/careers', label: 'Career Path' },
   { href: '/recruitment', label: 'Recruitment' },
   { href: '/csr', label: 'CSR' },
-  { href: '/client-portal', label: 'Client Portal' },
+  { href: '/training', label: 'Training Academy' },
   { href: '/affiliate', label: 'Affiliate Program' },
   { href: '/contact', label: 'Contact' },
 ];
