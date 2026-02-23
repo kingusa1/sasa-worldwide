@@ -49,12 +49,11 @@ export async function POST(req: NextRequest) {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
     const { transaction_id } = paymentIntent.metadata;
 
+    // Skip if no transaction_id — this is likely a course purchase
+    // which is handled by checkout.session.completed instead
     if (!transaction_id) {
-      console.error('No transaction_id in payment intent metadata');
-      return NextResponse.json(
-        { error: 'Missing transaction_id' },
-        { status: 400 }
-      );
+      console.log('No transaction_id in payment intent metadata — skipping (handled by checkout.session.completed)');
+      return NextResponse.json({ received: true });
     }
 
     try {
