@@ -38,6 +38,7 @@ const nextConfig = {
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               "connect-src 'self' https://text.pollinations.ai https://api.openai.com https://*.supabase.co",
+              "frame-src 'self' https://www.google.com https://maps.google.com https://drive.google.com https://docs.google.com https://www.openstreetmap.org https://js.stripe.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },
