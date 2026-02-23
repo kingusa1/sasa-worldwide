@@ -194,7 +194,7 @@ export default async function SalesDashboardPage() {
         {/* Quick Actions */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               href="/sales/my-projects"
               className="group p-5 border border-gray-100 rounded-xl hover:border-navy/30 hover:bg-navy/5 transition-all text-center"
@@ -216,6 +216,18 @@ export default async function SalesDashboardPage() {
               </div>
               <p className="font-semibold text-gray-900">My Customers</p>
               <p className="text-sm text-gray-500 mt-1">View customer list</p>
+            </Link>
+            <Link
+              href="/staff/training"
+              className="group p-5 border border-gray-100 rounded-xl hover:border-navy/30 hover:bg-navy/5 transition-all text-center"
+            >
+              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-100 transition-colors">
+                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <p className="font-semibold text-gray-900">Training</p>
+              <p className="text-sm text-gray-500 mt-1">Access your courses</p>
             </Link>
             <Link
               href="/sales/leaderboard"

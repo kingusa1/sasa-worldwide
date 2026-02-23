@@ -43,6 +43,7 @@ export default async function SalesLayout({
     { href: '/sales/dashboard', label: 'Dashboard' },
     { href: '/sales/my-projects', label: 'My Projects' },
     { href: '/crm/customers', label: 'Customers' },
+    { href: '/staff/training', label: 'Training' },
   ];
 
   return (
