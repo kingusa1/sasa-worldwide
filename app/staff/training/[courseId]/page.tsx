@@ -27,22 +27,46 @@ interface CourseData {
   progress: { total_lessons: number; completed_lessons: number; percentage: number; };
 }
 
+function extractGoogleDriveId(url: string): string | null {
+  // Handle multiple Google Drive URL formats
+  const patterns = [
+    /\/file\/d\/([a-zA-Z0-9_-]+)/,           // /file/d/{id}/anything
+    /\/open\?id=([a-zA-Z0-9_-]+)/,            // /open?id={id}
+    /id=([a-zA-Z0-9_-]+)/,                     // ?id={id}
+    /\/d\/([a-zA-Z0-9_-]+)/,                   // /d/{id}
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 function getEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
+    // YouTube
     if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
       const videoId = u.hostname.includes('youtu.be') ? u.pathname.slice(1) : u.searchParams.get('v');
       if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
+    // Vimeo
     if (u.hostname.includes('vimeo.com')) {
       const id = u.pathname.split('/').filter(Boolean).pop();
       if (id) return `https://player.vimeo.com/video/${id}`;
     }
+    // Google Drive - use embed format for reliability
     if (u.hostname.includes('drive.google.com')) {
-      const match = u.pathname.match(/\/file\/d\/([^/]+)/);
-      if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
+      const fileId = extractGoogleDriveId(url);
+      if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`;
     }
   } catch { /* ignore */ }
+  return url;
+}
+
+function getDirectDriveLink(url: string): string | null {
+  const fileId = extractGoogleDriveId(url);
+  if (fileId) return `https://drive.google.com/file/d/${fileId}/view`;
   return url;
 }
 
@@ -296,13 +320,28 @@ export default function CourseViewerPage() {
               {activeLesson.video_url && (activeLesson.content_type === 'video' || activeLesson.content_type === 'mixed') && (
                 <div className="bg-black">
                   <div className="max-w-[1200px] mx-auto">
-                    <div className="aspect-video">
+                    <div className="aspect-video relative">
                       <iframe
+                        key={activeLesson.id}
                         src={getEmbedUrl(activeLesson.video_url) || ''}
-                        className="w-full h-full"
+                        className="w-full h-full absolute inset-0"
                         allowFullScreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+                        loading="lazy"
                       />
+                    </div>
+                    {/* Fallback link in case embed doesn't load */}
+                    <div className="text-center py-2">
+                      <a
+                        href={getDirectDriveLink(activeLesson.video_url) || activeLesson.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-gray-500 hover:text-white transition-colors"
+                      >
+                        Video not loading? Click here to open directly
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -313,14 +352,29 @@ export default function CourseViewerPage() {
                 <div className="bg-black">
                   <div className="max-w-[1200px] mx-auto">
                     {getPreviewUrl(activeLesson.content) && (
-                      <div className="aspect-video">
+                      <div className="aspect-video relative">
                         <iframe
+                          key={`pdf-${activeLesson.id}`}
                           src={getPreviewUrl(activeLesson.content) || ''}
-                          className="w-full h-full"
+                          className="w-full h-full absolute inset-0"
                           allowFullScreen
+                          referrerPolicy="no-referrer-when-downgrade"
+                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+                          loading="lazy"
                         />
                       </div>
                     )}
+                    {/* Fallback link */}
+                    <div className="text-center py-2">
+                      <a
+                        href={getDownloadUrl(activeLesson.content) ? activeLesson.content.match(/https:\/\/drive\.google\.com\/file\/d\/[^/]+/)?.[0] + '/view' : '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-gray-500 hover:text-white transition-colors"
+                      >
+                        Not loading? Click here to open directly
+                      </a>
+                    </div>
                   </div>
                 </div>
               )}
