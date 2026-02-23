@@ -212,7 +212,6 @@ export async function createCheckoutSession(
   try {
     const session = await stripeClient.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       metadata,
       payment_intent_data: { metadata },
