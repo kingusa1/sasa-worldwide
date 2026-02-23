@@ -2,8 +2,12 @@ import Link from 'next/link';
 import { getAllPosts, BlogPost } from '@/lib/google-sheets';
 
 export const metadata = {
-  title: 'Insights & Blog | SASA Worldwide',
+  title: 'Insights & Blog',
   description: 'Expert insights on sales operations, field sales management, AI in sales, and growth strategies for businesses in the UAE.',
+  openGraph: {
+    title: 'Insights & Blog | SASA Worldwide',
+    description: 'Expert insights on sales operations, AI in sales, and growth strategies for UAE businesses.',
+  },
 };
 
 // Revalidate every 60 seconds to fetch fresh posts from Google Sheets

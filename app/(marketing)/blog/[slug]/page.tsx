@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ShareButtons from '@/components/ui/ShareButtons';
 import { getPostBySlug, getAllPosts, BlogPost } from '@/lib/google-sheets';
+import { ArticleJsonLd } from '@/components/seo/JsonLd';
 
 // Revalidate every 60 seconds to fetch fresh posts from Google Sheets
 export const revalidate = 60;
@@ -176,9 +177,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: 'Post Not Found | SASA Worldwide' };
   }
 
+  const description = post.content.substring(0, 160).replace(/<[^>]*>/g, '');
+
   return {
-    title: `${post.title} | SASA Worldwide`,
-    description: post.content.substring(0, 160).replace(/<[^>]*>/g, ''),
+    title: post.title,
+    description,
+    openGraph: {
+      title: post.title,
+      description,
+      type: 'article',
+      publishedTime: post.date,
+      authors: [post.author || 'SASA Worldwide Team'],
+      images: [{ url: post.image, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [post.image],
+    },
   };
 }
 
@@ -192,6 +209,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="bg-white">
+      <ArticleJsonLd
+        title={post.title}
+        description={post.content.substring(0, 160).replace(/<[^>]*>/g, '')}
+        image={post.image}
+        datePublished={post.date}
+        author={post.author || 'SASA Worldwide Team'}
+        url={`https://www.sasa-worldwide.com/blog/${slug}`}
+      />
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px] flex items-end">
         <div className="absolute inset-0">
