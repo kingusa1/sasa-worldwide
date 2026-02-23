@@ -116,12 +116,6 @@ export default function TrainingPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
               </svg>
             </motion.a>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 text-white font-semibold rounded-full hover:bg-white/20 transition-colors border border-white/20"
-            >
-              Already Enrolled? Login
-            </Link>
           </motion.div>
         </div>
       </section>
