@@ -398,16 +398,15 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              {/* Google Map */}
+              {/* Map */}
               <div className="relative h-64 rounded-2xl overflow-hidden shadow-card">
                 <iframe
-                  src="https://www.google.com/maps?q=Prime+Business+Centre+Tower+A,+Jumeirah+Village+Circle,+Dubai,+UAE&z=16&output=embed"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=55.2050%2C25.0500%2C55.2200%2C25.0620&layer=mapnik&marker=25.0557%2C55.2125"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
                   title="SASA Worldwide Office - Prime Business Center Tower A, JVC Dubai"
                 ></iframe>
                 <a
