@@ -399,26 +399,26 @@ export default function ContactPage() {
               </div>
 
               {/* Google Map */}
-              <a
-                href="https://maps.google.com/?q=Prime+Business+Centre+Tower+A,Jumeirah+Village+Circle,Dubai,UAE"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative h-64 rounded-2xl overflow-hidden shadow-card block group"
-              >
+              <div className="relative h-64 rounded-2xl overflow-hidden shadow-card">
                 <iframe
-                  src="https://maps.google.com/maps?q=Prime%20Business%20Centre%20Tower%20A%2C%20Jumeirah%20Village%20Circle%2C%20Dubai&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                  src="https://www.google.com/maps?q=Prime+Business+Centre+Tower+A,+Jumeirah+Village+Circle,+Dubai,+UAE&z=16&output=embed"
                   width="100%"
                   height="100%"
-                  style={{ border: 0, pointerEvents: 'none' }}
+                  style={{ border: 0 }}
+                  allowFullScreen
                   loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
                   title="SASA Worldwide Office - Prime Business Center Tower A, JVC Dubai"
                 ></iframe>
-                <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/10 transition-colors flex items-center justify-center">
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white px-4 py-2 rounded-full text-navy font-medium text-sm shadow-lg">
-                    Open in Google Maps
-                  </span>
-                </div>
-              </a>
+                <a
+                  href="https://www.google.com/maps/search/Prime+Business+Centre+Tower+A,+Jumeirah+Village+Circle,+Dubai,+UAE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-3 right-3 bg-white px-4 py-2 rounded-full text-navy font-medium text-sm shadow-lg hover:bg-gray-50 transition-colors"
+                >
+                  Open in Google Maps
+                </a>
+              </div>
             </div>
           </div>
         </div>
