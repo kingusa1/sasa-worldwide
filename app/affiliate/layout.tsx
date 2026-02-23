@@ -47,6 +47,12 @@ export default async function AffiliateLayout({
                 >
                   Customers
                 </Link>
+                <Link
+                  href="/staff/training"
+                  className="text-sm text-gray-700 hover:text-navy-600 transition-colors"
+                >
+                  Training
+                </Link>
               </div>
             </div>
             <div className="flex items-center gap-4">

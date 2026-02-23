@@ -26,7 +26,7 @@ export default function AssignCoursePage() {
       fetch(`/api/admin/training/courses/${courseId}`).then(r => r.json()),
     ]).then(([assignData, userData, courseData]) => {
       setAssignments(assignData.assignments || []);
-      setAllUsers((userData.users || []).filter((u: UserItem) => u.role !== 'admin'));
+      setAllUsers(userData.users || []);
       setCourseTitle(courseData.course?.title || 'Course');
       setLoading(false);
     }).catch(() => setLoading(false));

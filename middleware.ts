@@ -31,8 +31,12 @@ export default NextAuth(authConfig).auth((req) => {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 
-  // Staff portal routes (staff and admin only)
-  if (pathname.startsWith('/staff') && userRole !== 'staff' && userRole !== 'admin') {
+  // Staff portal routes (staff and admin only, except /staff/training which affiliates can access too)
+  if (pathname.startsWith('/staff/training')) {
+    if (userRole !== 'staff' && userRole !== 'admin' && userRole !== 'affiliate') {
+      return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
+    }
+  } else if (pathname.startsWith('/staff') && userRole !== 'staff' && userRole !== 'admin') {
     return NextResponse.redirect(new URL('/?error=Unauthorized', req.url));
   }
 
