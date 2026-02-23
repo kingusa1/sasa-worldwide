@@ -126,6 +126,77 @@ export default function TrainingPage() {
         </div>
       </section>
 
+      {/* Course Purchase Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-1.5 bg-navy/5 rounded-full text-navy text-sm font-medium tracking-wider mb-4">
+              FEATURED COURSE
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-navy mb-4">
+              SASA Sales Foundation Program
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Master the complete SASA sales methodology with 4 comprehensive foundations,
+              46 video modules, and professional presentation materials.
+            </p>
+          </div>
+
+          <div className="bg-cream rounded-3xl p-8 md:p-12 border border-navy/10">
+            <div className="grid md:grid-cols-2 gap-8 mb-10">
+              <div>
+                <h3 className="font-bold text-navy text-lg mb-4">Foundation 1 & 2</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    The Law of Averages & Success Factors
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    The 5 Steps Blueprint & Sales Mastery
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    KISS Storytelling & Closing Techniques
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-navy text-lg mb-4">Foundation 3 & 4</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    The 6 Impulse Factors & Psychology
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    The 8 Sales Habits & Compound Effect
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    46 Video Modules + Slide Materials
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="text-center border-t border-navy/10 pt-8">
+              <div className="text-5xl font-bold text-navy mb-2">AED 1,000</div>
+              <p className="text-gray-500 mb-6">One-time payment &middot; Lifetime access</p>
+              <Link
+                href="/training/purchase"
+                className="inline-flex items-center gap-2 px-10 py-4 bg-navy text-white font-semibold rounded-full hover:bg-navy/90 transition-colors text-lg"
+              >
+                Buy Course
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-24 bg-navy text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

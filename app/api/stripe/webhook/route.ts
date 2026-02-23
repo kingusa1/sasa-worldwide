@@ -3,6 +3,19 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { getStripe, getWebhookSecret } from '@/lib/stripe';
 import { sendVoucherEmail } from '@/lib/email';
+import { sendEmailSMTP } from '@/lib/email/smtp-client';
+import { logCoursePurchase } from '@/lib/google-sheets-payments';
+import { CoursePurchaseEmail } from '@/emails/CoursePurchaseEmail';
+import bcrypt from 'bcryptjs';
+
+function generateTempPassword(length = 12): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return password;
+}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -171,6 +184,160 @@ export async function POST(req: NextRequest) {
         received: true,
         error: error.message,
       });
+    }
+  }
+
+  // === Course Purchase Handler ===
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    if (session.metadata?.purchase_type === 'course_purchase') {
+      try {
+        const customerName = session.metadata.customer_name;
+        const customerEmail = session.metadata.customer_email;
+        const customerPhone = session.metadata.customer_phone || '';
+        const courseName = session.metadata.course_name;
+
+        // 1. Generate temporary password
+        const tempPassword = generateTempPassword();
+        const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+        // 2. Check if user already exists (idempotency for webhook retries)
+        const { data: existingUser } = await supabaseAdmin
+          .from('users')
+          .select('id')
+          .eq('email', customerEmail.toLowerCase())
+          .single();
+
+        let userId: string;
+
+        if (existingUser) {
+          userId = existingUser.id;
+        } else {
+          // 3. Create user with status: 'active' (auto-approved via payment)
+          const { data: newUser, error: userError } = await supabaseAdmin
+            .from('users')
+            .insert({
+              email: customerEmail.toLowerCase(),
+              password_hash: passwordHash,
+              name: customerName,
+              role: 'affiliate',
+              status: 'active',
+              email_verified: true,
+            })
+            .select()
+            .single();
+
+          if (userError) throw new Error(`Failed to create user: ${userError.message}`);
+          userId = newUser.id;
+
+          // 4. Create affiliate profile
+          const referralCode = `SASA-${userId.substring(0, 8).toUpperCase()}`;
+          await supabaseAdmin.from('affiliate_profiles').insert({
+            user_id: userId,
+            phone: customerPhone || null,
+            referral_code: referralCode,
+          });
+
+          // 5. Create signup_requests record (auto-approved)
+          await supabaseAdmin.from('signup_requests').insert({
+            user_id: userId,
+            status: 'approved',
+            approval_notes: 'Auto-approved: Course purchase payment verified',
+            reviewed_at: new Date().toISOString(),
+          });
+        }
+
+        // 6. Find the course
+        const { data: course } = await supabaseAdmin
+          .from('courses')
+          .select('id')
+          .eq('title', 'SASA Sales Foundation Program')
+          .single();
+
+        if (course) {
+          // 7. Auto-assign course to user
+          await supabaseAdmin
+            .from('course_assignments')
+            .upsert(
+              {
+                course_id: course.id,
+                user_id: userId,
+                assigned_by: userId,
+                assigned_at: new Date().toISOString(),
+              },
+              { onConflict: 'course_id,user_id', ignoreDuplicates: true }
+            );
+        }
+
+        // 8. Save purchase record (for success page credential retrieval)
+        const { error: purchaseError } = await supabaseAdmin
+          .from('course_purchases')
+          .upsert(
+            {
+              user_id: userId,
+              stripe_session_id: session.id,
+              stripe_payment_intent_id: (session.payment_intent as string) || '',
+              course_name: courseName,
+              amount: (session.amount_total || 0) / 100,
+              currency: session.currency || 'aed',
+              customer_email: customerEmail,
+              customer_name: customerName,
+              customer_phone: customerPhone || null,
+              temp_password: tempPassword,
+              status: 'completed',
+            },
+            { onConflict: 'stripe_session_id', ignoreDuplicates: true }
+          );
+
+        if (purchaseError) {
+          console.error('Failed to save purchase record:', purchaseError);
+        }
+
+        // 9. Log to Google Sheets (non-blocking)
+        logCoursePurchase({
+          date: new Date().toISOString(),
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+          courseName,
+          amount: (session.amount_total || 0) / 100,
+          stripeSessionId: session.id,
+          stripePaymentIntentId: (session.payment_intent as string) || '',
+          userId,
+          status: 'completed',
+        }).catch((err) => console.error('Google Sheets log failed:', err));
+
+        // 10. Send welcome email with credentials (non-blocking)
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.sasa-worldwide.com';
+        sendEmailSMTP({
+          to: customerEmail,
+          subject: 'Welcome to SASA Training - Your Login Credentials',
+          template: CoursePurchaseEmail({
+            name: customerName,
+            email: customerEmail,
+            password: tempPassword,
+            loginUrl: `${appUrl}/login`,
+            courseName,
+          }),
+        }).catch((err) => console.error('Course purchase email failed:', err));
+
+        // 11. Audit log
+        await supabaseAdmin.from('audit_logs').insert({
+          user_id: userId,
+          action: 'course_purchased',
+          metadata: {
+            course_name: courseName,
+            amount: (session.amount_total || 0) / 100,
+            stripe_session_id: session.id,
+          },
+        });
+
+        console.log(`Course purchase processed: ${customerEmail} -> ${courseName}`);
+      } catch (error: any) {
+        console.error('Course purchase webhook error:', error);
+        return NextResponse.json({ received: true, error: error.message });
+      }
     }
   }
 

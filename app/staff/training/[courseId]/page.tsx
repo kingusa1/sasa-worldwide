@@ -38,6 +38,10 @@ function getEmbedUrl(url: string): string | null {
       const id = u.pathname.split('/').filter(Boolean).pop();
       if (id) return `https://player.vimeo.com/video/${id}`;
     }
+    if (u.hostname.includes('drive.google.com')) {
+      const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+      if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
   } catch { /* ignore */ }
   return url;
 }
