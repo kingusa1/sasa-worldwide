@@ -12,7 +12,7 @@ const timeline = [
 
 const leadership = [
   {
-    name: 'Adam',
+    name: 'Adam Qureshi',
     role: 'Co-Founder & CEO',
     description: 'Co-Founder and CEO specialising in sales mastery, AI education, and building high-performance teams internationally.',
   },

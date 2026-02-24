@@ -5,12 +5,12 @@ import Link from 'next/link';
 const leadership = [
   // Co-Founders
   {
-    name: 'Adam',
+    name: 'Adam Qureshi',
     role: 'Co-Founder & CEO',
     shortRole: 'Co-Founder',
-    initials: 'A',
+    initials: 'AQ',
     color: 'from-teal-500 to-teal-700',
-    bio: 'Adam is the Co-Founder and CEO of Sasa Worldwide, a global training and technology company specialising in sales mastery, AI education, and business development. With over four years of experience in the direct sales industry, Adam has built and scaled high-performance teams across the UK, developing over 75 active agents and generating more than 1,500 weekly customer acquisitions. Operating within a wider network producing over 3,500–4,000 weekly sales, he has consistently created leaders from entry-level positions into management. Adam is known for his high standards, direct leadership style, and ability to build winning environments focused on performance, discipline, and growth. His current focus is expanding Sasa Worldwide internationally while equipping individuals with future-proof skills in sales, AI, and digital systems.',
+    bio: 'Adam Qureshi is the Co-Founder and CEO of Sasa Worldwide, a global training and technology company specialising in sales mastery, AI education, and business development. With over four years of experience in the direct sales industry, Adam Qureshi has built and scaled high-performance teams across the UK, developing over 75 active agents and generating more than 1,500 weekly customer acquisitions. Operating within a wider network producing over 3,500–4,000 weekly sales, he has consistently created leaders from entry-level positions into management. Adam Qureshi is known for his high standards, direct leadership style, and ability to build winning environments focused on performance, discipline, and growth. His current focus is expanding Sasa Worldwide internationally while equipping individuals with future-proof skills in sales, AI, and digital systems.',
     expertise: ['Sales Mastery', 'AI Education', 'Team Building', 'Business Development'],
   },
   {
