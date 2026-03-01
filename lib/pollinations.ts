@@ -5,11 +5,11 @@ import { getOpenRouterApiKey } from './ai-credentials';
 const OPENROUTER_API = 'https://openrouter.ai/api/v1/chat/completions';
 const POLLINATIONS_API = 'https://text.pollinations.ai/openai';
 
-// All Pollinations models for fallback
+// All Pollinations models for fallback (openai-large first)
 const POLLINATIONS_MODELS = [
+  'openai-large',
   'openai',
   'openai-fast',
-  'openai-large',
   'mistral',
   'gemini',
   'gemini-fast',

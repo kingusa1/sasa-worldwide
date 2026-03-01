@@ -8,20 +8,20 @@ const OPENROUTER_API = 'https://openrouter.ai/api/v1/chat/completions';
 const OPENAI_API = 'https://api.openai.com/v1/chat/completions';
 const POLLINATIONS_API = 'https://text.pollinations.ai/openai';
 
-// ALL Pollinations models for maximum fallback coverage
+// Pollinations fallback models (openai-large first since chickytutor is broken)
 const POLLINATIONS_MODELS = [
+  'openai-large',     // OpenAI Large (primary fallback)
   'openai',           // Default OpenAI
   'openai-fast',      // Faster OpenAI
-  'openai-large',     // Larger OpenAI
-  'mistral',          // Mistral AI
-  'gemini',           // Google Gemini
-  'gemini-fast',      // Faster Gemini
   'gemini-large',     // Larger Gemini
+  'gemini',           // Google Gemini
+  'mistral',          // Mistral AI
   'deepseek',         // DeepSeek
-  'qwen-coder',       // Qwen
-  'grok',             // Grok
-  'claude-fast',      // Claude (faster)
   'claude',           // Claude
+  'claude-fast',      // Claude (faster)
+  'grok',             // Grok
+  'qwen-coder',       // Qwen
+  'gemini-fast',      // Faster Gemini
   'kimi',             // Kimi
   'nova-fast',        // Nova
   'glm',              // GLM
@@ -31,41 +31,48 @@ const POLLINATIONS_MODELS = [
 ];
 
 // System prompt for SASA AI Assistant
-const SYSTEM_PROMPT = `You are SASA AI, the official virtual assistant for SASA Worldwide, UAE's leading sales operations company. You help website visitors learn about SASA's services, career opportunities, and company information.
+const SYSTEM_PROMPT = `You are SASA AI, the official virtual assistant for SASA Worldwide, UAE's leading sales operations company. You help website visitors learn about SASA's services, career opportunities, training programs, and company information.
 
 # YOUR IDENTITY
 - Name: SASA AI Assistant
-- Role: Helpful, professional customer service representative
+- Role: Helpful, professional customer service representative for SASA Worldwide
 - Tone: Friendly, professional, confident, approachable
-- Language: Clear, concise English (respond in English unless user writes in Arabic, then respond in Arabic)
+- Language: Clear, concise English (respond in Arabic if the user writes in Arabic)
 
 # COMPANY KNOWLEDGE
 ${getKnowledgeSummary()}
 
 # YOUR CAPABILITIES
-1. Answer questions about SASA's services (B2C, B2B, B2B2C, B2G)
-2. Explain career opportunities and the 5-phase career path
-3. Provide contact information and business hours
-4. Guide users to relevant website pages
+1. Answer questions about SASA's services (B2C, B2B, B2B2C, B2G) with full details
+2. Explain career opportunities and the 5-phase leadership pathway with KPIs and timelines
+3. Provide contact information, business hours, and office location
+4. Guide users to relevant website pages with correct URLs
 5. Explain SASA's technology (SASA OS, AI Academy)
-6. Share company history, values, and achievements
-7. Provide information about CSR initiatives
-8. Explain partnership opportunities
+6. Share company history, values, achievements, and timeline
+7. Provide information about CSR initiatives and community impact
+8. Explain partnership opportunities and the 4-step partnership process
+9. Describe training packages with pricing (Starter AED 1,000, Full Immersion AED 5,000, Corporate custom pricing)
+10. Share details about current job openings and how to apply
+11. Explain the leadership team and their roles
+12. Describe the 4-Foundation Sales System taught in training
 
 # RESPONSE GUIDELINES
-1. Keep responses concise (2-4 sentences for simple queries, up to 6 for detailed explanations)
+1. Keep responses concise (2-4 sentences for simple queries, up to 8 for detailed explanations)
 2. Use bullet points for listing multiple items
 3. Always be helpful and offer to answer more questions
-4. If relevant, suggest contacting SASA directly for personalized assistance
+4. If relevant, suggest contacting SASA directly for personalised assistance
 5. For job inquiries, mention the career path and direct to /recruitment page
 6. For partnership inquiries, suggest contacting info@sasa-worldwide.com
-7. Use the phone number +971 4 584 3777 for contact
-8. Never use markdown formatting like ** or ## - just plain text
+7. For training inquiries, explain packages and direct to /training page
+8. Use the phone number +971 4 584 3777 for contact
+9. Never use markdown formatting like ** or ## - just plain text
+10. When a client asks about pricing, be transparent about the training package prices
+11. Always recommend the most relevant page on the website when applicable
 
 # STRICT BOUNDARIES - NEVER DO THESE
-1. NEVER share financial information (revenue, profits, specific pricing)
+1. NEVER share financial information (revenue, profits, internal pricing)
 2. NEVER disclose employee personal details or individual contact information
-3. NEVER reveal specific client names or partnership details
+3. NEVER reveal specific client names or confidential partnership details
 4. NEVER share internal business processes or proprietary methods
 5. NEVER provide specific salary figures (mention "competitive" and "commission-based" model)
 6. NEVER pretend to be a human or claim to be something you're not
@@ -124,7 +131,7 @@ interface OpenAIResponse {
   }>;
 }
 
-// Try OpenRouter API (connected via OAuth)
+// Try OpenRouter API (connected via OAuth) - PRIMARY with GPT-4o large
 async function tryOpenRouter(
   messages: Array<{ role: string; content: string }>
 ): Promise<string> {
@@ -143,10 +150,10 @@ async function tryOpenRouter(
       'X-Title': 'SASA AI Assistant',
     },
     body: JSON.stringify({
-      model: 'openai/gpt-4o-mini', // Free tier friendly model
+      model: 'openai/gpt-4o', // GPT-4o large model
       messages,
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 800,
     }),
   });
 
@@ -165,7 +172,7 @@ async function tryOpenRouter(
   return text;
 }
 
-// Try OpenAI API directly (requires API key in env)
+// Try OpenAI API directly (requires API key in env) - GPT-4o large
 async function tryOpenAI(
   messages: Array<{ role: string; content: string }>
 ): Promise<string> {
@@ -182,10 +189,10 @@ async function tryOpenAI(
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o', // GPT-4o large model
       messages,
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 800,
     }),
   });
 
@@ -218,7 +225,7 @@ async function tryPollinationsModel(
       messages,
       model,
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: 800,
     }),
   });
 
@@ -273,13 +280,13 @@ export async function generateChatResponse(
 ): Promise<string> {
   const messages = buildMessages(userMessage, conversationHistory);
 
-  // 1. Try OpenRouter first (if connected via OAuth)
+  // 1. Try OpenRouter first (if connected via OAuth) - GPT-4o large
   try {
-    console.log('Trying OpenRouter...');
+    console.log('Trying OpenRouter (GPT-4o)...');
     const text = await tryOpenRouter(messages);
     const sanitized = sanitizeResponse(text);
     if (sanitized) {
-      console.log('Successfully used OpenRouter');
+      console.log('Successfully used OpenRouter GPT-4o');
       return sanitized;
     }
   } catch (error) {
@@ -287,13 +294,13 @@ export async function generateChatResponse(
     console.warn('OpenRouter failed:', errorMsg);
   }
 
-  // 2. Try OpenAI directly (if API key configured)
+  // 2. Try OpenAI directly (if API key configured) - GPT-4o large
   try {
-    console.log('Trying OpenAI...');
+    console.log('Trying OpenAI (GPT-4o)...');
     const text = await tryOpenAI(messages);
     const sanitized = sanitizeResponse(text);
     if (sanitized) {
-      console.log('Successfully used OpenAI');
+      console.log('Successfully used OpenAI GPT-4o');
       return sanitized;
     }
   } catch (error) {
@@ -301,9 +308,9 @@ export async function generateChatResponse(
     console.warn('OpenAI failed:', errorMsg);
   }
 
-  // 3. Fallback to ALL Pollinations models (free)
+  // 3. Fallback to ALL Pollinations models (free, openai-large first)
   try {
-    console.log('Trying Pollinations (all 18 models)...');
+    console.log('Trying Pollinations (openai-large first, then 17 more models)...');
     const text = await tryAllPollinations(messages);
     const sanitized = sanitizeResponse(text);
     if (sanitized) {
@@ -326,5 +333,5 @@ function getFallbackResponse(): string {
 
 // Get initial greeting message
 export function getWelcomeMessage(): string {
-  return "Hello! I'm SASA AI, your virtual assistant. I can help you learn about our sales operations services, career opportunities, or answer questions about SASA Worldwide. What would you like to know?";
+  return "Hello! I'm SASA AI, your virtual assistant. I can help you learn about our sales operations services, training programs, career opportunities, or answer questions about SASA Worldwide. What would you like to know?";
 }

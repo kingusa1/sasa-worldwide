@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/fetch-rss",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/ai/refresh-knowledge",
+      "schedule": "0 8 * * *"
     }
   ]
 }
