@@ -87,6 +87,27 @@ const services = [
       </svg>
     ),
   },
+  {
+    id: 'technology',
+    title: 'AI & Technology Solutions',
+    subtitle: 'Digital Transformation',
+    description: 'End-to-end AI automation, CRM development, website builds, and chatbot solutions designed to streamline your operations and accelerate growth.',
+    longDescription: 'Our technology division builds intelligent digital systems that transform how businesses operate. From AI-powered automation and custom CRM platforms to professional websites and smart chatbots, we deliver solutions that drive efficiency, reduce costs, and create competitive advantages.',
+    features: [
+      'AI automation & workflow systems',
+      'Custom CRM build & integration',
+      'Professional website development',
+      'Chatbot & AI assistant deployment',
+      'Data analytics & dashboards',
+      'Business process automation',
+    ],
+    stats: { value: '100+', label: 'Projects Delivered' },
+    icon: (
+      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function ServicesPage() {
@@ -107,8 +128,8 @@ export default function ServicesPage() {
               Sales Solutions That Deliver
             </h1>
             <p className="text-xl text-white/80 leading-relaxed">
-              From residential door-to-door campaigns to large-scale government programs,
-              we deploy elite sales teams tailored to every market segment.
+              From residential door-to-door campaigns to large-scale government programs
+              and cutting-edge AI technology solutions, we deliver results across every market segment.
             </p>
           </div>
         </div>

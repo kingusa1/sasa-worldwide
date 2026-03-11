@@ -108,6 +108,31 @@ export const SASA_KNOWLEDGE = {
       stat: "7 Emirates coverage",
       pageUrl: "/services/b2g",
     },
+    technology: {
+      name: "AI & Technology Solutions",
+      subtitle: "Digital Transformation",
+      description: "End-to-end AI automation, CRM development, website builds, and chatbot solutions designed to streamline operations and accelerate growth.",
+      features: [
+        "AI automation & workflow systems",
+        "Custom CRM build & integration (Salesforce, HubSpot, bespoke)",
+        "Professional website development",
+        "Chatbot & AI assistant deployment",
+        "Data analytics & dashboards",
+        "Business process automation",
+      ],
+      solutions: [
+        "Sales pipeline automation",
+        "Customer onboarding workflows",
+        "AI-powered lead scoring",
+        "Custom dashboard & reporting",
+        "E-commerce platforms",
+        "Email marketing automation",
+        "Document & invoice automation",
+        "API integrations & middleware",
+      ],
+      stat: "100+ projects delivered",
+      pageUrl: "/services/technology",
+    },
   },
 
   training: {
@@ -311,6 +336,7 @@ export const SASA_KNOWLEDGE = {
       b2b: "/services/b2b",
       b2b2c: "/services/b2b2c",
       b2g: "/services/b2g",
+      technology: "/services/technology",
       careers: "/careers",
       recruitment: "/recruitment",
       training: "/training",
@@ -389,6 +415,8 @@ SERVICES:
 2. B2B Corporate - ${k.services.b2b.description} (${k.services.b2b.stat}) - Page: ${k.services.b2b.pageUrl}
 3. B2B2C Hybrid - ${k.services.b2b2c.description} (${k.services.b2b2c.stat}) - Page: ${k.services.b2b2c.pageUrl}
 4. B2G Government - ${k.services.b2g.description} (${k.services.b2g.stat}) - Page: ${k.services.b2g.pageUrl}
+5. AI & Technology - ${k.services.technology.description} (${k.services.technology.stat}) - Page: ${k.services.technology.pageUrl}
+   Solutions: ${k.services.technology.solutions.join(', ')}
 
 TRAINING PROGRAMS (Page: /training):
 Program: ${k.training.programName} - "${k.training.tagline}"
